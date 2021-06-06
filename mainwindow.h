@@ -18,6 +18,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
+public:
+    void deleteItem(QTreeWidgetItem *item);
+    void addExistingItem(DepartmentComponent* itm,int index);
 private slots:
     void on_addEmplBtn_clicked();
 
@@ -25,9 +29,23 @@ private slots:
 
     void on_delEmplBtn_clicked();
 
+    void on_addDepBtn_clicked();
+
+    void on_undoBtn_clicked();
+
+    void on_redoBtn_clicked();
+
+
 private:
     Ui::MainWindow *ui;
+    enum actions{DeleteEmployee,DeleteDepartment,AddEmployee,AddDepartment} lastAction;
+    actions redoAction;
     QMap<QTreeWidgetItem*, QString> departments;
+    QMap<QTreeWidgetItem*, DepartmentComponent*> departmentItems;
+    QMap<QTreeWidgetItem*, DepartmentComponent*> employeeItems;
+    std::stack<actions>undoActions;
+    std::stack<actions>redoActions;
+
     QMap<QTreeWidgetItem*,employee> employeeChildren;
     void fillItems();
     void addRecord(std::string departmentName, employee empl);

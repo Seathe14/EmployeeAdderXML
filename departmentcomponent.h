@@ -2,10 +2,12 @@
 #define DEPARTMENTCOMPONENT_H
 #include <iostream>
 #include <vector>
+#include <algorithm>
 class DepartmentComponent {
 protected:
     DepartmentComponent* parent;
 public:
+    DepartmentComponent():parent(nullptr){}
     void setParent(DepartmentComponent* parent)
     {
         this->parent = parent;
@@ -16,9 +18,13 @@ public:
     }
     virtual void add(DepartmentComponent* component) {}
     virtual void remove(DepartmentComponent* component) {}
+    virtual void insert(DepartmentComponent* component,int index) {}
     virtual DepartmentComponent* getComponent(int componentIndex) { return nullptr; }
     virtual void displayEmployeeInfo() {}
+    virtual int numberOfLeaves() {return 0;}
     virtual float countAvgSalary() { return 0; }
+    virtual DepartmentComponent* makeClone() = 0;
+    virtual ~DepartmentComponent() {};
 };
 
 class Employee : public DepartmentComponent
@@ -30,7 +36,12 @@ public:
     std::string getName() { return name; }
     std::string getMiddleName() { return middleName; }
     std::string getFunctionInDep() { return functionInDep; }
+    std::string FIO(){return surname + " " + name + " " + middleName;}
     int getSalary() { return salary; }
+    DepartmentComponent* makeClone() override
+    {
+        return new Employee(*this);
+    }
     //void displayEmployeeInfo()
     //{
     //    std::cout << "FIO: " << surname << " " << name << " " << middleName << " , function " << functionInDep << ",salary " << salary << std::endl;
@@ -51,18 +62,33 @@ public:
     Departments(std::string name) : name(name) {}
     std::string getName() { return name; }
     int getAvgSalary() { return avgSalary; }
+    DepartmentComponent* makeClone() override
+    {
+        Departments* newDep = new Departments(this->name);
+        newDep->setParent(this->parent);
+        for (int i = 0; i < this->children.size(); i++)
+        {
+            DepartmentComponent* employeeToClone = this->children[i]->makeClone();
+            newDep->add(employeeToClone);
+        }
+        return newDep;
+    }
 private:
     std::string name;
     float avgSalary;
+    int numOfEmployees;
+
 public:
     void add(DepartmentComponent* component) override;
     void remove(DepartmentComponent* component) override;
+    void insert(DepartmentComponent* component, int index) override;
     DepartmentComponent* getComponent(int componentIndex) override
     {
         return (DepartmentComponent*)children[componentIndex];
     }
     void displayEmployeeInfo() override;
     float countAvgSalary()override;
+    int numberOfLeaves() override;
 
 };
 #endif // DEPARTMENTCOMPONENT_H

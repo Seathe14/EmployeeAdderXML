@@ -14,7 +14,6 @@ parsedBase::parsedBase()
                 departments.push_back(dep);
             }
             oss.str("");
-            //std::string aa = ((Departments*)departmentss->getComponent(0))->getName();
             for (int i = 0; i < departments.size(); i++)
             {
                 oss << "//department[@name='" << departments[i].getName() << "']//employment";
@@ -27,99 +26,202 @@ parsedBase::parsedBase()
                     std::string functionInDep = node.node().child("function").child_value();
                     std::string salary = node.node().child("salary").child_value();
                     departmentss->getComponent(i)->add(new Employee(surname,name,middleName,functionInDep,atoi(salary.c_str())));
-                    //std::string nana = ((Employee*)departmentss->getComponent(i)->getComponent(i))->getName();
-                    for (pugi::xml_node childNode : node.node())
-                    {
-                        std::string aa = childNode.next_sibling().child_value();
-                        empl.addField(childNode.name(), childNode.child_value());
-                        //std::cout << childNode.name() << std::endl;
-                    }
-                    departments[i].addEmployee(empl);
                 }
                 oss.str("");
             }
 }
 
-void parsedBase::addRecord(std::string departmentName, employee empl)
+void parsedBase::newAdd(DepartmentComponent *toAdd)
 {
-        std::string toSelect;
-        //sprintf_s((char*)toSelect.c_str(), "//department[@name = \'%s\']/employments", departmentName.c_str());
-        std::ostringstream oss;
-        oss << "//department[@name = '" << departmentName << "']/employments";
-        //sprintf_s((char*)toSelect.c_str(), 40 +departmentName.size(), "//department[@name = \'%s\']/employments",(char*)departmentName.c_str());
-        pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
-        departmentwhereName.node().append_child("employment")
-            .append_child("surname").text().set(empl.surname.c_str());
-        pugi::xml_node childNode = departmentwhereName.node().last_child();
-
-        //childNode.append_child("surname").text().set(surname.c_str());
-        childNode.append_child("name").text().set(empl.name.c_str());
-        childNode.append_child("middleName").text().set(empl.middleName.c_str());
-        childNode.append_child("function").text().set(empl.functionInDep.c_str());
-        childNode.append_child("salary").text().set(empl.salary.c_str());
-        for(int i =0;i<departments.size();i++)
-        {
-            if (departments[i].getName() == departmentName)
-            {
-                departments[i].addEmployee(empl);
-                break;
-            }
-        }
-}
-
-void parsedBase::deleteRecord(std::string departmentName, employee empl)
-{
-    std::ostringstream oss;
-        //oss << "//department[@name = '" << departmentName << "']/employments";
-        oss << "//department[@name='" << departmentName <<"']//employment[name = '" << empl.name << "'][surname='" << empl.surname << "'][middleName = '" << empl.middleName << "']"
-        << "[function ='" << empl.functionInDep << "'][salary = '" << empl.salary << "']";
-        pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
-        //departmentwhereName.node().remove_children();
-        departmentwhereName.node().parent().remove_child(departmentwhereName.node());
-        for(int i =0;i<departments.size();i++)
-        {
-            if (departments[i].getName() == departmentName)
-            {
-                departments[i].removeEmployee(empl);
-                break;
-            }
-        }
-}
-
-void parsedBase::deleteDepartment(std::string departmentName)
-{
-    for(int i =0;i<departments.size();i++)
+    if(toAdd->GetParent() == nullptr)
     {
-        if(departments[i].getName() == departmentName)
+        departmentss->add(toAdd);
+        std::ostringstream oss;
+        std::string departmentName = dynamic_cast<Departments*>(toAdd)->getName();
+        oss << "//department";
+        std::ostringstream attribute;
+        attribute << "name";
+        pugi::xpath_node departmentsNode = doc.select_node(oss.str().c_str());
+        pugi::xml_node childNode = departmentsNode.node().append_child("department");
+        childNode.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
+        childNode.append_child("employments");
+        std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->GetParent()->numberOfLeaves()-1);
+        undoStack.push(pairToPush);
+        //.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
+    }
+    else
+    {
+        std::ostringstream oss;
+        std::string departmentName = dynamic_cast<Departments*>(toAdd->GetParent())->getName();
+        std::string surname = dynamic_cast<Employee*>(toAdd)->getSurname();
+        std::string name = dynamic_cast<Employee*>(toAdd)->getName();
+        std::string middleName = dynamic_cast<Employee*>(toAdd)->getMiddleName();
+        std::string functionInDep = dynamic_cast<Employee*>(toAdd)->getFunctionInDep();
+        std::string salary = std::to_string(dynamic_cast<Employee*>(toAdd)->getSalary());
+        oss << "//department[@name = '" << departmentName << "']/employments";
+        pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
+        departmentwhereName.node().append_child("employment");
+        pugi::xml_node childNode = departmentwhereName.node().last_child();
+        appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
+        std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->GetParent()->numberOfLeaves()-1);
+        undoStack.push(pairToPush);
+        //childNode.append_child("surname").text().set(surname.c_str());
+        //childNode.append_child("name").text().set(name.c_str());
+        //childNode.append_child("middleName").text().set(middleName.c_str());
+        //childNode.append_child("function").text().set(functionInDep.c_str());
+        //childNode.append_child("salary").text().set(salary.c_str());
+    }
+}
+
+void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
+{
+    if(dynamic_cast<Departments*>(toAdd->GetParent())->getName() == "")
+    {
+        std::ostringstream oss;
+        std::string departmentName = dynamic_cast<Departments*>(toAdd)->getName();
+        oss << "//departments";
+        std::ostringstream attribute;
+        attribute << "name";
+        pugi::xpath_node departmentsNode = doc.select_node(oss.str().c_str());
+        int nodesSize = departmentsNode.node().select_nodes("department").size();
+        int counter = 0;
+        for(auto i : departmentsNode.node())
         {
-            for(int j = 0;j<departments[i].employees.size();j++)
+            if(counter == index)
             {
-                deleteRecord(departmentName,departments[i].employees[j]);
+                pugi::xml_node childNode = departmentsNode.node().insert_child_before("department",i);
+                childNode.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
+                childNode.append_child("employments");
+                for(int i =0;i<toAdd->numberOfLeaves();i++)
+                {
+                   insertRecord(toAdd->getComponent(i),i);
+                }
+                break;
             }
-            departments.erase(std::remove(departments.begin(),departments.end(),departments[i]));
-            break;
+            counter++;
+        }
+        if(counter == nodesSize)
+        {
+            pugi::xml_node childNode = departmentsNode.node().append_child("department");
+            childNode.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
+            childNode.append_child("employments");
+            for(int i =0;i<toAdd->numberOfLeaves();i++)
+            {
+               insertRecord(toAdd->getComponent(i),i);
+            }
         }
     }
-    std::ostringstream oss;
-        oss << "//department[@name='" << departmentName <<"']";
-        pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
-        //departmentwhereName.node().parent().remove_children();
-        departmentwhereName.node().parent().remove_child(departmentwhereName.node());
+    else
+    {
+        std::ostringstream oss;
+        std::string departmentName = dynamic_cast<Departments*>(toAdd->GetParent())->getName();
+        std::string surname = dynamic_cast<Employee*>(toAdd)->getSurname();
+        std::string name = dynamic_cast<Employee*>(toAdd)->getName();
+        std::string middleName = dynamic_cast<Employee*>(toAdd)->getMiddleName();
+        std::string functionInDep = dynamic_cast<Employee*>(toAdd)->getFunctionInDep();
+        std::string salary = std::to_string(dynamic_cast<Employee*>(toAdd)->getSalary());
+        oss << "//department[@name = '" << departmentName << "']/employments";
+        pugi::xpath_node departmentNode = doc.select_node(oss.str().c_str());
+
+
+        int counter = 0;
+        int nodesSize = departmentNode.node().select_nodes("employment").size();
+
+        for(auto i : departmentNode.node())
+        {
+            if(counter == index)
+            {
+                pugi::xml_node childNode = departmentNode.node().insert_child_before("employment",i);
+                appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
+                //childNode.append_child("surname").text().set(surname.c_str());
+                //childNode.append_child("name").text().set(name.c_str());
+                //childNode.append_child("middleName").text().set(middleName.c_str());
+                //childNode.append_child("function").text().set(functionInDep.c_str());
+                //childNode.append_child("salary").text().set(salary.c_str());
+                break;
+            }
+            counter++;
+        }
+        if(counter == nodesSize)
+        {
+            pugi::xml_node childNode = departmentNode.node().append_child("employment");
+            appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
+            //childNode.append_child("surname").text().set(surname.c_str());
+            //childNode.append_child("name").text().set(name.c_str());
+            //childNode.append_child("middleName").text().set(middleName.c_str());
+            //childNode.append_child("function").text().set(functionInDep.c_str());
+            //childNode.append_child("salary").text().set(salary.c_str());
+        }
+    }
 }
 
-void employee::addField(std::string fieldName, std::string fieldValue)
+void parsedBase::appendEmployeee(pugi::xml_node childNode, std::string surname, std::string name, std::string middleName, std::string functionInDep, std::string salary)
 {
-    if (fieldName == "surname")
-                surname = fieldValue;
-            if (fieldName == "name")
-                name = fieldValue;
-            if (fieldName == "middleName")
-                middleName = fieldValue;
-            if (fieldName == "function")
-                functionInDep = fieldValue;
-            if (fieldName == "salary")
-            {
-                salary = fieldValue;
-                //salary = std::stoi(fieldValue);
-            }
+    childNode.append_child("surname").text().set(surname.c_str());
+    childNode.append_child("name").text().set(name.c_str());
+    childNode.append_child("middleName").text().set(middleName.c_str());
+    childNode.append_child("function").text().set(functionInDep.c_str());
+    childNode.append_child("salary").text().set(salary.c_str());
 }
+
+
+void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
+{
+    if(toDelete->GetParent()!=nullptr)
+    {
+        if(dynamic_cast<Departments*>(toDelete->GetParent())->getName() == "")
+        {
+            std::string departmentName = dynamic_cast<Departments*>(toDelete)->getName();
+            std::ostringstream oss;
+            oss << "//department[@name='" << departmentName <<"']";
+            pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
+            //departmentwhereName.node().parent().remove_children();
+            DepartmentComponent* deletedEmployee = toDelete->makeClone();
+            departmentwhereName.node().parent().remove_child(departmentwhereName.node());
+            std::pair<DepartmentComponent*,int> pairToPush(deletedEmployee,index);
+            undoStack.push(pairToPush);
+            departmentss->remove(toDelete);
+        }
+        else
+        {
+            std::ostringstream oss;
+            std::string departmentName = dynamic_cast<Departments*>(toDelete->GetParent())->getName();
+            std::string surname = dynamic_cast<Employee*>(toDelete)->getSurname();
+            std::string name = dynamic_cast<Employee*>(toDelete)->getName();
+            std::string middleName = dynamic_cast<Employee*>(toDelete)->getMiddleName();
+            std::string functionInDep = dynamic_cast<Employee*>(toDelete)->getFunctionInDep();
+            std::string salary = std::to_string(dynamic_cast<Employee*>(toDelete)->getSalary());
+            oss << "//department[@name='" << departmentName <<"']//employment[name = '" << name << "'][surname='" << surname << "'][middleName = '" << middleName << "']"
+            << "[function ='" << functionInDep << "'][salary = '" << salary << "']";
+            pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
+            departmentwhereName.node().parent().remove_child(departmentwhereName.node());
+            DepartmentComponent* deletedEmployee = toDelete->makeClone();
+            std::pair<DepartmentComponent*,int> pairToPush(deletedEmployee,index);
+            //std::unique_ptr<std::pair<DepartmentComponent*,int>> pairToPush = std::make_unique<std::pair<DepartmentComponent*,int>>(toDelete,index);
+            //std::make_unique()
+            undoStack.push(pairToPush);
+            toDelete->GetParent()->remove(toDelete);
+        }
+    }
+}
+
+std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
+{
+    std::pair<DepartmentComponent *,int> newPair = undoStack.top();
+    redoStack.push(undoStack.top());
+    //if(action == TOADD)
+    //    redoStack.top().first = undoStack.top().first->makeClone();
+    undoStack.pop();
+    return newPair;
+}
+
+std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem()
+{
+    std::pair<DepartmentComponent *,int> newPair = redoStack.top();
+    //undoStack.pop();
+    //undoStack.push(redoStack.top());
+    redoStack.pop();
+    return newPair;
+
+}
+

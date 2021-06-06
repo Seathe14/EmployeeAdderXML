@@ -4,9 +4,12 @@
 #endif // PARSER_H
 #include <vector>
 #include <string>
+#include <stack>
 #include <algorithm>
 #include "pugixml/pugixml.hpp"
 #include "departmentcomponent.h"
+#define TODELETE 1
+#define TOADD 2
 class employee
 {
 public:
@@ -75,8 +78,14 @@ public:
     parsedBase();
     std::vector<department>departments;
     void addRecord(std::string departmentName, employee empl);
+    void newAdd(DepartmentComponent* toAdd);
+    void insertRecord(DepartmentComponent* toAdd,int index);
     void deleteRecord(std::string departmentName,employee empl);
     void deleteDepartment(std::string departmentName);
+    void appendEmployeee(pugi::xml_node, std::string surname,std::string name,std::string middleName,std::string functionInDep,std::string salary);
+    void newDelete(DepartmentComponent* toDelete, int index);
+    std::pair<DepartmentComponent*,int> getUndoTopItem(int action);
+    std::pair<DepartmentComponent*,int> getRedoTopItem();
     void saveChanges()
     {
         pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
@@ -93,5 +102,8 @@ public:
     };
     DepartmentComponent* departmentss;
 private:
+    std::stack<std::pair<DepartmentComponent*,int>> undoStack;
+    std::stack<std::pair<DepartmentComponent*,int>> redoStack;
+
     pugi::xml_document doc;
 };
