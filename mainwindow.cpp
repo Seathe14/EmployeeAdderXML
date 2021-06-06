@@ -36,7 +36,7 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm)
     }
     else
     {
-        undoActions.push(DeleteEmployee);
+        undoActions.push(AddEmployee);
         lastAction = DeleteEmployee;
         Employee* emplToDelete = dynamic_cast<Employee*>(employeeItems.value(itm));
         int index = itm->parent()->indexOfChild(itm);
@@ -110,7 +110,7 @@ void MainWindow::on_addEmplBtn_clicked()
         thisDepartment = departmentItems.value(ui->treeWidget->currentItem()->parent());
     }
     //ui->treeWidget->currentItem()->in
-    undoActions.push(AddEmployee);
+    undoActions.push(DeleteEmployee);
     thisDepartment->add(toAdd);
     pb.newAdd(toAdd);
 }
@@ -176,44 +176,27 @@ void MainWindow::on_addDepBtn_clicked()
 
 void MainWindow::on_undoBtn_clicked()
 {
+    actions toPerformUndo = undoActions.top();
+    //lastAction = undoActions.top();
+    //undoActions.pop();
 
-    QTreeWidgetItem *child = new QTreeWidgetItem();
-    lastAction = undoActions.top();
-    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem();
-    undoActions.pop();
-    if(lastAction == DeleteEmployee)
+    if(toPerformUndo == AddEmployee)
     {
+        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
         addExistingItem(undoItem.first,undoItem.second);
-        //std::string FIO = (dynamic_cast<Employee*>(undoItem.first))->FIO();
-        //child->setText(0,QString::fromStdString(FIO));
-        //std::string parentName = (dynamic_cast<Departments*>(undoItem.first->GetParent()))->getName();
-        //undoItem.first->GetParent()->insert(undoItem.first,undoItem.second);
-        //employeeItems.insert(child,undoItem.first);
-        //departmentItems.key(undoItem.first->GetParent())->insertChild(undoItem.second,child);
         redoActions.push(DeleteEmployee);
-        //pb.insertRecord(undoItem.first,undoItem.second);
+        undoActions.pop();
     }
-    else if(lastAction == DeleteDepartment)
+    else if(toPerformUndo == AddDepartment)
     {
+        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADD);
         addExistingItem(undoItem.first,undoItem.second);
-        //std::string departmentName = dynamic_cast<Departments*>(undoItem.first)->getName();
-        //child->setText(0,QString::fromStdString(departmentName));
-        //undoItem.first->GetParent()->insert(undoItem.first,undoItem.second);
-        //ui->treeWidget->insertTopLevelItem(undoItem.second,child);
-        //departmentItems.insert(child,undoItem.first);
-        //for(int i = 0; i < undoItem.first->numberOfLeaves();i++)
-        //{
-        //    QTreeWidgetItem *employeeChild = new QTreeWidgetItem();
-        //    std::string FIO = (dynamic_cast<Employee*>(undoItem.first->getComponent(i)))->FIO();
-        //    employeeChild->setText(0,QString::fromStdString(FIO));
-        //    employeeItems.insert(employeeChild,undoItem.first->getComponent(i));
-        //    child->addChild(employeeChild);
-        //}
         redoActions.push(DeleteDepartment);
-        //pb.insertRecord(undoItem.first,undoItem.second);
+        undoActions.pop();
     }
-    else if(lastAction == AddEmployee)
+    else if(toPerformUndo == DeleteEmployee)
     {
+        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADD);
         for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
         {
             if(i.value() == undoItem.first)
@@ -223,9 +206,11 @@ void MainWindow::on_undoBtn_clicked()
             }
         }
         redoActions.push(AddEmployee);
+        undoActions.pop();
     }
-    else if(lastAction == AddDepartment)
+    else if(toPerformUndo == DeleteDepartment)
     {
+        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
         for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
         {
             if(i.value() == undoItem.first)
@@ -235,6 +220,42 @@ void MainWindow::on_undoBtn_clicked()
             }
         }
     }
+    //if(lastAction == AddEmployee)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
+    //    addExistingItem(undoItem.first,undoItem.second);
+    //    redoActions.push(DeleteEmployee);
+    //}
+    //else if(lastAction == DeleteDepartment)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
+    //    addExistingItem(undoItem.first,undoItem.second);
+    //    redoActions.push(DeleteDepartment);    }
+    //else if(lastAction == DeleteEmployee)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADD);
+    //    for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
+    //    {
+    //        if(i.value() == undoItem.first)
+    //        {
+    //            deleteItem(i.key());
+    //            break;
+    //        }
+    //    }
+    //    redoActions.push(AddEmployee);
+    //}
+    //else if(lastAction == AddDepartment)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADD);
+    //    for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
+    //    {
+    //        if(i.value() == undoItem.first)
+    //        {
+    //            deleteItem(i.key());
+    //            break;
+    //        }
+    //    }
+    //}
 }
 
 void MainWindow::on_redoBtn_clicked()
@@ -260,6 +281,7 @@ void MainWindow::on_redoBtn_clicked()
             if(i.value() == redoItem.first)
             {
                 deleteItem(i.key());
+                break;
             }
         }
     }

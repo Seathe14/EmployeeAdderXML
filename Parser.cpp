@@ -65,11 +65,7 @@ void parsedBase::newAdd(DepartmentComponent *toAdd)
         appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
         std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->GetParent()->numberOfLeaves()-1);
         undoStack.push(pairToPush);
-        //childNode.append_child("surname").text().set(surname.c_str());
-        //childNode.append_child("name").text().set(name.c_str());
-        //childNode.append_child("middleName").text().set(middleName.c_str());
-        //childNode.append_child("function").text().set(functionInDep.c_str());
-        //childNode.append_child("salary").text().set(salary.c_str());
+
     }
 }
 
@@ -133,11 +129,6 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
             {
                 pugi::xml_node childNode = departmentNode.node().insert_child_before("employment",i);
                 appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
-                //childNode.append_child("surname").text().set(surname.c_str());
-                //childNode.append_child("name").text().set(name.c_str());
-                //childNode.append_child("middleName").text().set(middleName.c_str());
-                //childNode.append_child("function").text().set(functionInDep.c_str());
-                //childNode.append_child("salary").text().set(salary.c_str());
                 break;
             }
             counter++;
@@ -146,11 +137,6 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
         {
             pugi::xml_node childNode = departmentNode.node().append_child("employment");
             appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
-            //childNode.append_child("surname").text().set(surname.c_str());
-            //childNode.append_child("name").text().set(name.c_str());
-            //childNode.append_child("middleName").text().set(middleName.c_str());
-            //childNode.append_child("function").text().set(functionInDep.c_str());
-            //childNode.append_child("salary").text().set(salary.c_str());
         }
     }
 }
@@ -175,7 +161,6 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
             std::ostringstream oss;
             oss << "//department[@name='" << departmentName <<"']";
             pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
-            //departmentwhereName.node().parent().remove_children();
             DepartmentComponent* deletedEmployee = toDelete->makeClone();
             departmentwhereName.node().parent().remove_child(departmentwhereName.node());
             std::pair<DepartmentComponent*,int> pairToPush(deletedEmployee,index);
@@ -197,8 +182,7 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
             departmentwhereName.node().parent().remove_child(departmentwhereName.node());
             DepartmentComponent* deletedEmployee = toDelete->makeClone();
             std::pair<DepartmentComponent*,int> pairToPush(deletedEmployee,index);
-            //std::unique_ptr<std::pair<DepartmentComponent*,int>> pairToPush = std::make_unique<std::pair<DepartmentComponent*,int>>(toDelete,index);
-            //std::make_unique()
+
             undoStack.push(pairToPush);
             toDelete->GetParent()->remove(toDelete);
         }
@@ -209,8 +193,8 @@ std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
 {
     std::pair<DepartmentComponent *,int> newPair = undoStack.top();
     redoStack.push(undoStack.top());
-    //if(action == TOADD)
-    //    redoStack.top().first = undoStack.top().first->makeClone();
+    if(action == TOADD)
+        redoStack.top().first = undoStack.top().first->makeClone();
     undoStack.pop();
     return newPair;
 }
@@ -218,8 +202,6 @@ std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
 std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem()
 {
     std::pair<DepartmentComponent *,int> newPair = redoStack.top();
-    //undoStack.pop();
-    //undoStack.push(redoStack.top());
     redoStack.pop();
     return newPair;
 

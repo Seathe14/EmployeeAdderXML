@@ -42,10 +42,6 @@ public:
     {
         return new Employee(*this);
     }
-    //void displayEmployeeInfo()
-    //{
-    //    std::cout << "FIO: " << surname << " " << name << " " << middleName << " , function " << functionInDep << ",salary " << salary << std::endl;
-    //}
 private:
     std::string surname;
     std::string name;
