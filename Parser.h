@@ -82,10 +82,14 @@ public:
     void insertRecord(DepartmentComponent* toAdd,int index);
     void deleteRecord(std::string departmentName,employee empl);
     void deleteDepartment(std::string departmentName);
+    bool isUndoEmpty() { return undoStack.empty();}
+    bool isRedoEmpty() { return redoStack.empty();}
     void appendEmployeee(pugi::xml_node, std::string surname,std::string name,std::string middleName,std::string functionInDep,std::string salary);
     void newDelete(DepartmentComponent* toDelete, int index);
     std::pair<DepartmentComponent*,int> getUndoTopItem(int action);
-    std::pair<DepartmentComponent*,int> getRedoTopItem();
+    std::pair<DepartmentComponent*,int> peekRedoItem();
+    std::pair<DepartmentComponent*,int> getRedoTopItem(int action);
+    void setToPush(bool toPush) {this->toPush = toPush;}
     void saveChanges()
     {
         pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
@@ -104,6 +108,7 @@ public:
 private:
     std::stack<std::pair<DepartmentComponent*,int>> undoStack;
     std::stack<std::pair<DepartmentComponent*,int>> redoStack;
+    bool toPush;
 
     pugi::xml_document doc;
 };

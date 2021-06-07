@@ -38,7 +38,7 @@ void parsedBase::newAdd(DepartmentComponent *toAdd)
         departmentss->add(toAdd);
         std::ostringstream oss;
         std::string departmentName = dynamic_cast<Departments*>(toAdd)->getName();
-        oss << "//department";
+        oss << "//departments";
         std::ostringstream attribute;
         attribute << "name";
         pugi::xpath_node departmentsNode = doc.select_node(oss.str().c_str());
@@ -106,6 +106,11 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
                insertRecord(toAdd->getComponent(i),i);
             }
         }
+        if(toPush)
+        {
+            std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->GetParent()->numberOfLeaves()-1);
+            undoStack.push(pairToPush);
+        }
     }
     else
     {
@@ -138,6 +143,11 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
             pugi::xml_node childNode = departmentNode.node().append_child("employment");
             appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
         }
+        if(toPush)
+        {
+            std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->GetParent()->numberOfLeaves()-1);
+            undoStack.push(pairToPush);
+        }
     }
 }
 
@@ -162,9 +172,35 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
             oss << "//department[@name='" << departmentName <<"']";
             pugi::xpath_node departmentwhereName = doc.select_node(oss.str().c_str());
             DepartmentComponent* deletedEmployee = toDelete->makeClone();
+            auto copiedStack = undoStack;
+           // auto copiedRedoStack = redoStack;
+           // for(int i =0;i<=copiedRedoStack.size();i++)
+           // {
+           //     auto copiedPair = copiedRedoStack.top();
+           //     copiedRedoStack.pop();
+           //     if(dynamic_cast<Departments*>(copiedPair.first->GetParent())->getName() == dynamic_cast<Departments*>(toDelete)->getName())
+           //         {
+           //         copiedPair.first->setParent(deletedEmployee);
+           //         copiedPair.first->GetParent()->add(copiedPair.first);
+           //         }
+           // }
+            for(int i = 0;i<copiedStack.size();i++)
+            {
+                std::pair<DepartmentComponent*,int> copiedPair = copiedStack.top();
+                copiedStack.pop();
+                if(copiedPair.first->GetParent() == toDelete)
+                {
+                    copiedPair.first->setParent(deletedEmployee);
+                }
+            }
+            //for(int i = 0 ;i<undoStack.size();i++)
+            //{
+            //    auto i = undoStack.
+            //}
             departmentwhereName.node().parent().remove_child(departmentwhereName.node());
             std::pair<DepartmentComponent*,int> pairToPush(deletedEmployee,index);
-            undoStack.push(pairToPush);
+            if(toPush)
+                undoStack.push(pairToPush);
             departmentss->remove(toDelete);
         }
         else
@@ -182,8 +218,8 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
             departmentwhereName.node().parent().remove_child(departmentwhereName.node());
             DepartmentComponent* deletedEmployee = toDelete->makeClone();
             std::pair<DepartmentComponent*,int> pairToPush(deletedEmployee,index);
-
-            undoStack.push(pairToPush);
+            if(toPush)
+                undoStack.push(pairToPush);
             toDelete->GetParent()->remove(toDelete);
         }
     }
@@ -191,17 +227,41 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
 
 std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
 {
+    toPush = false;
     std::pair<DepartmentComponent *,int> newPair = undoStack.top();
     redoStack.push(undoStack.top());
     if(action == TOADD)
+    {
+
         redoStack.top().first = undoStack.top().first->makeClone();
+    }
     undoStack.pop();
     return newPair;
 }
 
-std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem()
+std::pair<DepartmentComponent *, int> parsedBase::peekRedoItem()
 {
+    return redoStack.top();
+}
+
+std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem(int action)
+{
+    toPush = true;
     std::pair<DepartmentComponent *,int> newPair = redoStack.top();
+    auto clonedStack = redoStack;
+    //for(int i =0;i<=clonedStack.size();i++)
+    //{
+    //    auto clonedPair = clonedStack.top();
+    //    clonedStack.pop();
+    //    if(dynamic_cast<Departments*>(clonedPair.first->GetParent())->getName() == dynamic_cast<Departments*>(newPair.first)->getName())
+    //    {
+    //        newPair.first->add(clonedPair.first);
+    //        clonedPair.first->setParent(newPair.first);
+    //    }
+    //}
+    //undoStack.push(redoStack.top());
+    //if(action == TOADD)
+    //    undoStack.top().first = redoStack.top().first->makeClone();
     redoStack.pop();
     return newPair;
 

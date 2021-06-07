@@ -5,6 +5,7 @@
 #include <QList>
 #include <QMap>
 #include <QTreeWidgetItem>
+#include <QTimer>
 #include "Parser.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,9 +21,11 @@ public:
 
 
 public:
-    void deleteItem(QTreeWidgetItem *item);
-    void addExistingItem(DepartmentComponent* itm,int index);
+    void deleteItem(QTreeWidgetItem *itm,bool toPush);
+    void addExistingItem(DepartmentComponent* itm, int index, bool toPush);
 private slots:
+    void checkUndoRedoButtons();
+
     void on_addEmplBtn_clicked();
 
     void on_treeWidget_itemActivated(QTreeWidgetItem *item, int column);
@@ -38,14 +41,14 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    enum actions{DeleteEmployee,DeleteDepartment,AddEmployee,AddDepartment} lastAction;
+    enum actions{DeleteEmployee,DeleteDepartment,AddEmployee,AddDepartment};
     actions redoAction;
     QMap<QTreeWidgetItem*, QString> departments;
     QMap<QTreeWidgetItem*, DepartmentComponent*> departmentItems;
     QMap<QTreeWidgetItem*, DepartmentComponent*> employeeItems;
     std::stack<actions>undoActions;
     std::stack<actions>redoActions;
-
+    QTimer *timer;
     QMap<QTreeWidgetItem*,employee> employeeChildren;
     void fillItems();
     void addRecord(std::string departmentName, employee empl);
