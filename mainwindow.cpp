@@ -81,7 +81,6 @@ void MainWindow::addExistingItem(DepartmentComponent *itm, int index,bool toPush
         itm->getParent()->insert(itm,index);
         employeeItems.insert(child,itm);
         departmentItems.key(itm->getParent())->insertChild(index,child);
-        //redoActions.push(DeleteEmployee);
         pb.insertRecord(itm,index);
     }
 }

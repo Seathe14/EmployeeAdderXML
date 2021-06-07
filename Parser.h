@@ -35,8 +35,8 @@ public:
     };
     DepartmentComponent* departments;
 private:
-    std::stack<std::pair<DepartmentComponent*,int>> undoStack;
-    std::stack<std::pair<DepartmentComponent*,int>> redoStack;
+    std::vector<std::pair<DepartmentComponent*,int>> undoStack;
+    std::vector<std::pair<DepartmentComponent*,int>> redoStack;
     bool toPush;
 
     pugi::xml_document doc;

@@ -48,7 +48,7 @@ void parsedBase::addRecord(DepartmentComponent *toAdd)
         childNode.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
         childNode.append_child("employments");
         std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
-        undoStack.push(pairToPush);
+        undoStack.push_back(pairToPush);
     }
     else                             //if it's a new employee of an existing department
     {
@@ -65,7 +65,7 @@ void parsedBase::addRecord(DepartmentComponent *toAdd)
         pugi::xml_node childNode = employmentsNode.node().last_child();
         appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
         std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
-        undoStack.push(pairToPush);
+        undoStack.push_back(pairToPush);
 
     }
 }
@@ -110,7 +110,7 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
         if(toPush)
         {
             std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
-            undoStack.push(pairToPush);
+            undoStack.push_back(pairToPush);
         }
     }
     else                //  if we're inserting an employee.
@@ -147,7 +147,7 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
         if(toPush)
         {
             std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
-            undoStack.push(pairToPush);
+            undoStack.push_back(pairToPush);
         }
     }
 }
@@ -181,10 +181,14 @@ void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index)
             {
                 if(copiedRedoStack.empty())
                     break;
-                auto copiedPair = copiedRedoStack.top();
-                copiedRedoStack.pop();
+                auto copiedPair = copiedRedoStack.back();
+                copiedRedoStack.pop_back();
                 if(dynamic_cast<Departments*>(copiedPair.first->getParent())->getName() == dynamic_cast<Departments*>(toDelete)->getName())
                 {
+                    if(redoStack[i].first == toDelete)
+                    {
+                        redoStack[i].first = copyOfDeletedDepartment;
+                    }
                     if(!toDelete->contains(copiedPair.first))
                     {
                         copiedPair.first->setParent(copyOfDeletedDepartment);
@@ -194,29 +198,23 @@ void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index)
                     {
                         int foundIndex = toDelete->find(copiedPair.first);
                         DepartmentComponent* employee = copiedPair.first->getParent()->getComponent(foundIndex)->makeClone();
-                        copiedPair.first->getParent()->setComponent(employee,foundIndex);
-                        //DepartmentComponent* employee = copiedPair.first->getParent()->getComponent(foundIndex)->makeClone();
-                        //copiedPair.first->getParent()->getComponent(foundIndex)->setComponent(&employee);
-                        //copiedPair.first->getParent()->getComponent(foundIndex) = copiedPair.first->getParent()->getComponent(foundIndex)->makeClone();
-                       // DepartmentComponent* employee = copiedPair.first->getParent()->getComponent(foundIndex);
-                        //employee = employee->makeClone();
-                        //employee->setParent(copyOfDeletedDepartment);
-                        //copiedPair.first = copiedPair.first->makeClone();
+                        redoStack[redoStackSize- i - 1].first = employee;
+                        redoStack[redoStackSize-1-i].first->setParent(copyOfDeletedDepartment);
                     }
                 }
                 else if(dynamic_cast<Departments*>(copiedPair.first->getParent())->getName() == "")
-                if(dynamic_cast<Departments*>(copiedPair.first)->getName() == dynamic_cast<Departments*>(toDelete)->getName())
-                {
-                    DepartmentComponent* dep = copiedPair.first->getParent()->getComponent(index);
-                    dep = copyOfDeletedDepartment;
-                }
+                    if(dynamic_cast<Departments*>(copiedPair.first)->getName() == dynamic_cast<Departments*>(toDelete)->getName())
+                    {
+                        DepartmentComponent* dep = copiedPair.first->getParent()->getComponent(index);
+                        dep = copyOfDeletedDepartment;
+                    }
             }
             for(int i = 0;i<undoStackSize;i++)
             {
                 if(copiedUndoStack.empty())
                     break;
-                std::pair<DepartmentComponent*,int> copiedPair = copiedUndoStack.top();
-                copiedUndoStack.pop();
+                std::pair<DepartmentComponent*,int> copiedPair = copiedUndoStack.back();
+                copiedUndoStack.pop_back();
                 if(copiedPair.first->getParent() == toDelete)
                 {
                     copiedPair.first->setParent(copyOfDeletedDepartment);
@@ -225,7 +223,7 @@ void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index)
             departmentNode.node().parent().remove_child(departmentNode.node());
             std::pair<DepartmentComponent*,int> pairToPush(copyOfDeletedDepartment,index);
             if(toPush)
-                undoStack.push(pairToPush);
+                undoStack.push_back(pairToPush);
             departments->remove(toDelete);
         }
         else
@@ -244,7 +242,7 @@ void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index)
             DepartmentComponent* copyOfDeletedEmployee = toDelete->makeClone();
             std::pair<DepartmentComponent*,int> pairToPush(copyOfDeletedEmployee,index);
             if(toPush)
-                undoStack.push(pairToPush);
+                undoStack.push_back(pairToPush);
             toDelete->getParent()->remove(toDelete);
         }
     }
@@ -253,13 +251,13 @@ void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index)
 std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
 {
     toPush = false;
-    std::pair<DepartmentComponent *,int> newPair = undoStack.top();
-    redoStack.push(undoStack.top());
+    std::pair<DepartmentComponent *,int> newPair = undoStack.back();
+    redoStack.push_back(undoStack.back());
     if(action == TOADD)
     {
-        redoStack.top().first = undoStack.top().first->makeClone();
+        redoStack.back().first = undoStack.back().first->makeClone();
     }
-    undoStack.pop();
+    undoStack.pop_back();
     return newPair;
 }
 
@@ -267,15 +265,15 @@ std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
 std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem(int action)
 {
     toPush = true;
-    std::pair<DepartmentComponent *,int> newPair = redoStack.top();
+    std::pair<DepartmentComponent *,int> newPair = redoStack.back();
     auto clonedStack = redoStack;
     if(dynamic_cast<Departments*>(newPair.first->getParent())->getName() == "") // To fix add deparment -> add employee -> undo -> undo -> redo -> redo
     {                                                                           // Basically fixing when employee is deleted before department and it loses its parent pointer.
         int clonedStackSize = clonedStack.size();
         for(int i =0;i<clonedStackSize;i++)
         {
-            auto clonedPair = clonedStack.top();
-            clonedStack.pop();
+            auto clonedPair = clonedStack.back();
+            clonedStack.pop_back();
             if(dynamic_cast<Departments*>(clonedPair.first->getParent())->getName() == dynamic_cast<Departments*>(newPair.first)->getName()
                     && clonedPair.first->getParent()!= newPair.first)
             {
@@ -283,8 +281,7 @@ std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem(int action)
             }
         }
     }
-    redoStack.pop();
+    redoStack.pop_back();
     return newPair;
-
 }
 

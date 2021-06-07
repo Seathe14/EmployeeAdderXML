@@ -27,9 +27,6 @@ public:
     virtual float countAvgSalary() { return 0; }
     virtual DepartmentComponent* makeClone() = 0;
     virtual void setComponent(DepartmentComponent*,int index) {}
-    //DepartmentComponent* operator = (DepartmentComponent* dep) {
-    //    *this = dep;
-    //}
     virtual ~DepartmentComponent() {};
 };
 
@@ -100,10 +97,6 @@ public:
         return (DepartmentComponent*)children[componentIndex];
     }
     void displayEmployeeInfo() override;
-    //DepartmentComponent* operator = (const DepartmentComponent&  component)
-    //{
-    //    *this = component;
-    //}
     float countAvgSalary()override;
     int numberOfLeaves() override;
 
