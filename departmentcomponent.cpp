@@ -5,7 +5,7 @@ void Departments::add(DepartmentComponent *component)
 {
       this->children.push_back(component);
       component->setParent(this);
-      if (component->GetParent() != nullptr)
+      if (component->getParent() != nullptr)
       {
           numOfEmployees++;
       }
@@ -14,7 +14,7 @@ void Departments::add(DepartmentComponent *component)
 void Departments::remove(DepartmentComponent *component)
 {
     children.erase(std::remove(children.begin(),children.end(),component));
-    if (component->GetParent() != nullptr)
+    if (component->getParent() != nullptr)
     {
         numOfEmployees--;
     }
@@ -35,7 +35,7 @@ void Departments::insert(DepartmentComponent *component, int index)
         this->children.insert(it, component);
     }
     component->setParent(this);
-    if (component->GetParent() != nullptr)
+    if (component->getParent() != nullptr)
     {
         numOfEmployees++;
     }

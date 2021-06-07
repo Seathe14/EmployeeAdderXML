@@ -12,7 +12,7 @@ public:
     {
         this->parent = parent;
     }
-    DepartmentComponent* GetParent()const
+    DepartmentComponent* getParent()const
     {
         return this->parent;
     }
@@ -55,9 +55,9 @@ protected:
     std::vector<DepartmentComponent*> children;
 public:
     Departments() = default;
-    Departments(std::string name) : name(name) {}
+    Departments(std::string name) : name(name),numOfEmployees(0) {}
     std::string getName() { return name; }
-    int getAvgSalary() { return avgSalary; }
+    float getAvgSalary() { return avgSalary; }
     DepartmentComponent* makeClone() override
     {
         Departments* newDep = new Departments(this->name);
@@ -69,6 +69,7 @@ public:
         }
         return newDep;
     }
+    int getNumOfEmployees() {return numOfEmployees;}
 private:
     std::string name;
     float avgSalary;

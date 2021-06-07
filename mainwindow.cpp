@@ -23,12 +23,6 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm,bool toPush)
     {
             if(toPush)
                 undoActions.push(AddDepartment);
-            //if(pb.peekRedoItem().first->GetParent() == departmentItems.value(itm))
-            //{
-            //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
-            //    addExistingItem(undoItem.first,undoItem.second,false);
-            //    //redoActions.push(DeleteEmployee);
-            //}
             int index = ui->treeWidget->indexOfTopLevelItem(itm);
             pb.newDelete(departmentItems.value(itm),index);
             for(auto i : employeeItems.keys())
@@ -57,13 +51,13 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm,bool toPush)
 void MainWindow::addExistingItem(DepartmentComponent *itm, int index,bool toPush)
 {
     QTreeWidgetItem *child = new QTreeWidgetItem();
-    if(dynamic_cast<Departments*>(itm->GetParent())->getName() == "")
+    if(dynamic_cast<Departments*>(itm->getParent())->getName() == "")
     {
         if(toPush)
             undoActions.push(DeleteDepartment);
         std::string departmentName = dynamic_cast<Departments*>(itm)->getName();
         child->setText(0,QString::fromStdString(departmentName));
-        itm->GetParent()->insert(itm,index);
+        itm->getParent()->insert(itm,index);
         ui->treeWidget->insertTopLevelItem(index,child);
         departmentItems.insert(child,itm);
         for(int i = 0; i < itm->numberOfLeaves();i++)
@@ -83,10 +77,10 @@ void MainWindow::addExistingItem(DepartmentComponent *itm, int index,bool toPush
             undoActions.push(DeleteEmployee);
         std::string FIO = (dynamic_cast<Employee*>(itm))->FIO();
         child->setText(0,QString::fromStdString(FIO));
-        std::string parentName = (dynamic_cast<Departments*>(itm->GetParent()))->getName();
-        itm->GetParent()->insert(itm,index);
+        std::string parentName = (dynamic_cast<Departments*>(itm->getParent()))->getName();
+        itm->getParent()->insert(itm,index);
         employeeItems.insert(child,itm);
-        departmentItems.key(itm->GetParent())->insertChild(index,child);
+        departmentItems.key(itm->getParent())->insertChild(index,child);
         //redoActions.push(DeleteEmployee);
         pb.insertRecord(itm,index);
     }
@@ -129,7 +123,6 @@ void MainWindow::on_addEmplBtn_clicked()
         ui->treeWidget->currentItem()->parent()->addChild(child);
         thisDepartment = departmentItems.value(ui->treeWidget->currentItem()->parent());
     }
-    //ui->treeWidget->currentItem()->in
     undoActions.push(DeleteEmployee);
     thisDepartment->add(toAdd);
     pb.newAdd(toAdd);
@@ -137,35 +130,45 @@ void MainWindow::on_addEmplBtn_clicked()
 
 void MainWindow::fillItems()
 {
-    for(int i =0;i<pb.departments.size();i++)
+    for(int i =0;i<pb.departments->numberOfLeaves();i++)
     {
         QTreeWidgetItem *itm = new QTreeWidgetItem(ui->treeWidget);
-        itm->setText(0,QString::fromStdString(dynamic_cast<Departments*>(pb.departmentss->getComponent(i))->getName()));
-        departmentItems.insert(itm,pb.departmentss->getComponent(i));
-        departments.insert(itm,QString::fromStdString(pb.departments[i].getName()));
+        itm->setText(0,QString::fromStdString(dynamic_cast<Departments*>(pb.departments->getComponent(i))->getName()));
+        departmentItems.insert(itm,pb.departments->getComponent(i));
         ui->treeWidget->insertTopLevelItem(0,itm);
     }
-    for(int i =0;i<pb.departmentss->numberOfLeaves();i++)
+    for(int i =0;i<pb.departments->numberOfLeaves();i++)
     {
-        for(int j =0;j<pb.departmentss->getComponent(i)->numberOfLeaves();j++)
+        for(int j =0;j<pb.departments->getComponent(i)->numberOfLeaves();j++)
         {
-            std::string FIO = dynamic_cast<Employee*>(pb.departmentss->getComponent(i)->getComponent(j))->FIO();
+            std::string FIO = dynamic_cast<Employee*>(pb.departments->getComponent(i)->getComponent(j))->FIO();
             QTreeWidgetItem *child = new QTreeWidgetItem();
             child->setText(0,QString::fromStdString(FIO));
-            employeeItems.insert(child,pb.departmentss->getComponent(i)->getComponent(j));
+            employeeItems.insert(child,pb.departments->getComponent(i)->getComponent(j));
             for(auto k : departmentItems.keys())
             {
-                if(k->text(0).toStdString() == dynamic_cast<Departments*>(pb.departmentss->getComponent(i))->getName())
+                if(k->text(0).toStdString() == dynamic_cast<Departments*>(pb.departments->getComponent(i))->getName())
                     k->addChild(child);
             }
         }
     }
 }
 
+void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+{
+    if(item->parent() == nullptr)
+    {
+        ui->departmentAvgSalaryLE->setText(QString::number(departmentItems.value(item)->countAvgSalary()));
+        ui->departmentEmployeeNumLE ->setText(QString::number(dynamic_cast<Departments*>(departmentItems.value(item))->getNumOfEmployees()));
+        return;
+    }
+}
 void MainWindow::on_treeWidget_itemActivated(QTreeWidgetItem *item, int column)
 {
     if(item->parent() == nullptr)
+    {
         return;
+    }
     Employee* employeeItm = dynamic_cast<Employee*>(employeeItems.value(item));
     ui->surnameLE->setText(QString::fromStdString(employeeItm->getSurname()));
     ui->nameLE->setText(QString::fromStdString(employeeItm->getName()));
@@ -198,23 +201,18 @@ void MainWindow::on_addDepBtn_clicked()
 void MainWindow::on_undoBtn_clicked()
 {
     actions toPerformUndo = undoActions.top();
-    //lastAction = undoActions.top();
-    //undoActions.pop();
     undoActions.pop();
-
     if(toPerformUndo == AddEmployee)
     {
         std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
         addExistingItem(undoItem.first,undoItem.second,false);
         redoActions.push(DeleteEmployee);
-        //undoActions.pop();
     }
     else if(toPerformUndo == AddDepartment)
     {
         std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
         addExistingItem(undoItem.first,undoItem.second,false);
         redoActions.push(DeleteDepartment);
-        //undoActions.pop();
     }
     else if(toPerformUndo == DeleteEmployee)
     {
@@ -243,43 +241,6 @@ void MainWindow::on_undoBtn_clicked()
         redoActions.push(AddDepartment);
 
     }
-
-    //if(lastAction == AddEmployee)
-    //{
-    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
-    //    addExistingItem(undoItem.first,undoItem.second);
-    //    redoActions.push(DeleteEmployee);
-    //}
-    //else if(lastAction == DeleteDepartment)
-    //{
-    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETE);
-    //    addExistingItem(undoItem.first,undoItem.second);
-    //    redoActions.push(DeleteDepartment);    }
-    //else if(lastAction == DeleteEmployee)
-    //{
-    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADD);
-    //    for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
-    //    {
-    //        if(i.value() == undoItem.first)
-    //        {
-    //            deleteItem(i.key());
-    //            break;
-    //        }
-    //    }
-    //    redoActions.push(AddEmployee);
-    //}
-    //else if(lastAction == AddDepartment)
-    //{
-    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADD);
-    //    for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
-    //    {
-    //        if(i.value() == undoItem.first)
-    //        {
-    //            deleteItem(i.key());
-    //            break;
-    //        }
-    //    }
-    //}
 }
 
 void MainWindow::on_redoBtn_clicked()
@@ -314,13 +275,18 @@ void MainWindow::on_redoBtn_clicked()
     else if(toPerformRedo == AddEmployee)
     {
         std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TODELETE);
-
         addExistingItem(redoItem.first,redoItem.second,true);
     }
     else if(toPerformRedo == AddDepartment)
     {
         std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TODELETE);
         addExistingItem(redoItem.first,redoItem.second,true);
-        //undoActions.push(DeleteDepartment);
     }
+}
+
+
+
+void MainWindow::on_saveBtn_clicked()
+{
+    pb.saveChanges(ui->saveLE->text().toStdString());
 }
