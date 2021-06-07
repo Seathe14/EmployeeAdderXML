@@ -16,14 +16,20 @@ public:
     {
         return this->parent;
     }
+    virtual bool contains(DepartmentComponent* component){}
     virtual void add(DepartmentComponent* component) {}
     virtual void remove(DepartmentComponent* component) {}
     virtual void insert(DepartmentComponent* component,int index) {}
+    virtual int find(DepartmentComponent* component) {return -1;}
     virtual DepartmentComponent* getComponent(int componentIndex) { return nullptr; }
     virtual void displayEmployeeInfo() {}
     virtual int numberOfLeaves() {return 0;}
     virtual float countAvgSalary() { return 0; }
     virtual DepartmentComponent* makeClone() = 0;
+    virtual void setComponent(DepartmentComponent*,int index) {}
+    //DepartmentComponent* operator = (DepartmentComponent* dep) {
+    //    *this = dep;
+    //}
     virtual ~DepartmentComponent() {};
 };
 
@@ -86,11 +92,18 @@ public:
     void add(DepartmentComponent* component) override;
     void remove(DepartmentComponent* component) override;
     void insert(DepartmentComponent* component, int index) override;
+    bool contains(DepartmentComponent* component) override;
+    int find(DepartmentComponent* component) override;
+    void setComponent(DepartmentComponent* component,int index)override;
     DepartmentComponent* getComponent(int componentIndex) override
     {
         return (DepartmentComponent*)children[componentIndex];
     }
     void displayEmployeeInfo() override;
+    //DepartmentComponent* operator = (const DepartmentComponent&  component)
+    //{
+    //    *this = component;
+    //}
     float countAvgSalary()override;
     int numberOfLeaves() override;
 

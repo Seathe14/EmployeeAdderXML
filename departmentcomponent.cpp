@@ -41,6 +41,35 @@ void Departments::insert(DepartmentComponent *component, int index)
     }
 }
 
+bool Departments::contains(DepartmentComponent *component)
+{
+    for(int i =0;i<this->numOfEmployees;i++)
+    {
+        if(this->getComponent(i) == component)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+int Departments::find(DepartmentComponent *component)
+{
+    for(int i =0;i<this->numOfEmployees;i++)
+    {
+        if(this->getComponent(i) == component)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void Departments::setComponent(DepartmentComponent *component, int index)
+{
+    children[index] = component;
+}
+
 void Departments::displayEmployeeInfo()
 {
     for (auto i : children)

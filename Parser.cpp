@@ -33,7 +33,7 @@ parsedBase::parsedBase()
             }
 }
 
-void parsedBase::newAdd(DepartmentComponent *toAdd)
+void parsedBase::addRecord(DepartmentComponent *toAdd)
 {
     if(toAdd->getParent() == nullptr) // if it's a new department
     {
@@ -162,7 +162,7 @@ void parsedBase::appendEmployeee(pugi::xml_node childNode, std::string surname, 
 }
 
 
-void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
+void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index)
 {
     if(toDelete->getParent()!=nullptr)
     {
@@ -184,10 +184,32 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
                 auto copiedPair = copiedRedoStack.top();
                 copiedRedoStack.pop();
                 if(dynamic_cast<Departments*>(copiedPair.first->getParent())->getName() == dynamic_cast<Departments*>(toDelete)->getName())
+                {
+                    if(!toDelete->contains(copiedPair.first))
                     {
-                    copiedPair.first->setParent(copyOfDeletedDepartment);
-                    copiedPair.first->getParent()->add(copiedPair.first);
+                        copiedPair.first->setParent(copyOfDeletedDepartment);
+                        copiedPair.first->getParent()->add(copiedPair.first);
                     }
+                    else
+                    {
+                        int foundIndex = toDelete->find(copiedPair.first);
+                        DepartmentComponent* employee = copiedPair.first->getParent()->getComponent(foundIndex)->makeClone();
+                        copiedPair.first->getParent()->setComponent(employee,foundIndex);
+                        //DepartmentComponent* employee = copiedPair.first->getParent()->getComponent(foundIndex)->makeClone();
+                        //copiedPair.first->getParent()->getComponent(foundIndex)->setComponent(&employee);
+                        //copiedPair.first->getParent()->getComponent(foundIndex) = copiedPair.first->getParent()->getComponent(foundIndex)->makeClone();
+                       // DepartmentComponent* employee = copiedPair.first->getParent()->getComponent(foundIndex);
+                        //employee = employee->makeClone();
+                        //employee->setParent(copyOfDeletedDepartment);
+                        //copiedPair.first = copiedPair.first->makeClone();
+                    }
+                }
+                else if(dynamic_cast<Departments*>(copiedPair.first->getParent())->getName() == "")
+                if(dynamic_cast<Departments*>(copiedPair.first)->getName() == dynamic_cast<Departments*>(toDelete)->getName())
+                {
+                    DepartmentComponent* dep = copiedPair.first->getParent()->getComponent(index);
+                    dep = copyOfDeletedDepartment;
+                }
             }
             for(int i = 0;i<undoStackSize;i++)
             {

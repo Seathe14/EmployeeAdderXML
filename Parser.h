@@ -15,12 +15,12 @@ class parsedBase
 {
 public:
     parsedBase();
-    void newAdd(DepartmentComponent* toAdd);
+    void addRecord(DepartmentComponent* toAdd);
     void insertRecord(DepartmentComponent* toAdd,int index);
     bool isUndoEmpty() { return undoStack.empty();}
     bool isRedoEmpty() { return redoStack.empty();}
     void appendEmployeee(pugi::xml_node, std::string surname,std::string name,std::string middleName,std::string functionInDep,std::string salary);
-    void newDelete(DepartmentComponent* toDelete, int index);
+    void deleteRecord(DepartmentComponent* toDelete, int index);
     std::pair<DepartmentComponent*,int> getUndoTopItem(int action);
     std::pair<DepartmentComponent*,int> peekRedoItem();
     std::pair<DepartmentComponent*,int> getRedoTopItem(int action);
@@ -31,10 +31,7 @@ public:
     }
     ~parsedBase()
     {
-        //pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
-        //decl.append_attribute("version") = "1.0";
-        //decl.append_attribute("encoding") = "UTF-8";
-        //doc.save_file("save_file_output.xml","   ");
+
     };
     DepartmentComponent* departments;
 private:

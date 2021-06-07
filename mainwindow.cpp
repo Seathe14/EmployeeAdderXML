@@ -24,7 +24,7 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm,bool toPush)
             if(toPush)
                 undoActions.push(AddDepartment);
             int index = ui->treeWidget->indexOfTopLevelItem(itm);
-            pb.newDelete(departmentItems.value(itm),index);
+            pb.deleteRecord(departmentItems.value(itm),index);
             for(auto i : employeeItems.keys())
             {
                 if(i->parent() == itm)
@@ -42,7 +42,7 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm,bool toPush)
             undoActions.push(AddEmployee);
         Employee* emplToDelete = dynamic_cast<Employee*>(employeeItems.value(itm));
         int index = itm->parent()->indexOfChild(itm);
-        pb.newDelete(emplToDelete,index);
+        pb.deleteRecord(emplToDelete,index);
         employeeItems.remove(itm);
         itm->parent()->removeChild(itm);
     }
@@ -125,7 +125,7 @@ void MainWindow::on_addEmplBtn_clicked()
     }
     undoActions.push(DeleteEmployee);
     thisDepartment->add(toAdd);
-    pb.newAdd(toAdd);
+    pb.addRecord(toAdd);
 }
 
 void MainWindow::fillItems()
@@ -194,7 +194,7 @@ void MainWindow::on_addDepBtn_clicked()
     departmentItems.insert(itm,newDepartment);
     newDepartment->setParent(nullptr);
     undoActions.push(DeleteDepartment);
-    pb.newAdd(newDepartment);
+    pb.addRecord(newDepartment);
 
 }
 
