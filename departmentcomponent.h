@@ -56,6 +56,13 @@ protected:
 public:
     Departments() = default;
     Departments(std::string name) : name(name),numOfEmployees(0) {}
+    ~Departments()
+    {
+        for (int i =0;i<children.size();i++)
+        {
+            delete children[i];
+        }
+    }
     std::string getName() { return name; }
     float getAvgSalary() { return avgSalary; }
     DepartmentComponent* makeClone() override

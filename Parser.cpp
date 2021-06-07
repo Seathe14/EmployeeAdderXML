@@ -175,7 +175,9 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
             DepartmentComponent* copyOfDeletedDepartment = toDelete->makeClone();
             auto copiedUndoStack = undoStack;
             auto copiedRedoStack = redoStack;
-            for(int i =0;i<=copiedRedoStack.size();i++) // the same fix as in getRedoTopItem otherwise it doesn't work
+            int redoStackSize = copiedRedoStack.size();
+            int undoStackSize = copiedUndoStack.size();
+            for(int i =0;i<redoStackSize;i++) // the same fix as in getRedoTopItem otherwise it doesn't work
             {
                 if(copiedRedoStack.empty())
                     break;
@@ -187,8 +189,10 @@ void parsedBase::newDelete(DepartmentComponent *toDelete, int index)
                     copiedPair.first->getParent()->add(copiedPair.first);
                     }
             }
-            for(int i = 0;i<copiedUndoStack.size();i++)
+            for(int i = 0;i<undoStackSize;i++)
             {
+                if(copiedUndoStack.empty())
+                    break;
                 std::pair<DepartmentComponent*,int> copiedPair = copiedUndoStack.top();
                 copiedUndoStack.pop();
                 if(copiedPair.first->getParent() == toDelete)
@@ -231,7 +235,6 @@ std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
     redoStack.push(undoStack.top());
     if(action == TOADD)
     {
-
         redoStack.top().first = undoStack.top().first->makeClone();
     }
     undoStack.pop();
@@ -246,16 +249,17 @@ std::pair<DepartmentComponent *, int> parsedBase::getRedoTopItem(int action)
     auto clonedStack = redoStack;
     if(dynamic_cast<Departments*>(newPair.first->getParent())->getName() == "") // To fix add deparment -> add employee -> undo -> undo -> redo -> redo
     {                                                                           // Basically fixing when employee is deleted before department and it loses its parent pointer.
-    for(int i =0;i<=clonedStack.size();i++)
-    {
-        auto clonedPair = clonedStack.top();
-        clonedStack.pop();
-        if(dynamic_cast<Departments*>(clonedPair.first->getParent())->getName() == dynamic_cast<Departments*>(newPair.first)->getName()
-                && clonedPair.first->getParent()!= newPair.first)
+        int clonedStackSize = clonedStack.size();
+        for(int i =0;i<clonedStackSize;i++)
         {
-            clonedPair.first->setParent(newPair.first);
+            auto clonedPair = clonedStack.top();
+            clonedStack.pop();
+            if(dynamic_cast<Departments*>(clonedPair.first->getParent())->getName() == dynamic_cast<Departments*>(newPair.first)->getName()
+                    && clonedPair.first->getParent()!= newPair.first)
+            {
+                clonedPair.first->setParent(newPair.first);
+            }
         }
-    }
     }
     redoStack.pop();
     return newPair;
