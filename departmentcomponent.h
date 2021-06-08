@@ -16,7 +16,7 @@ public:
     {
         return this->parent;
     }
-    virtual bool contains(DepartmentComponent* component){}
+    virtual bool contains(DepartmentComponent* component){ return 0;}
     virtual void add(DepartmentComponent* component) {}
     virtual void remove(DepartmentComponent* component) {}
     virtual void insert(DepartmentComponent* component,int index) {}

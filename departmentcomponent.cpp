@@ -81,7 +81,10 @@ void Departments::displayEmployeeInfo()
 
 float Departments::countAvgSalary()
 {
-
+    if(children.size() == 0)
+    {
+        return 0;
+    }
     avgSalary = 0;
     for (int i = 0; i < children.size(); i++)
     {
