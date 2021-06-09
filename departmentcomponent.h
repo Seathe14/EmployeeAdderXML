@@ -21,6 +21,7 @@ public:
     virtual void remove(DepartmentComponent* component) {}
     virtual void insert(DepartmentComponent* component,int index) {}
     virtual int find(DepartmentComponent* component) {return -1;}
+    virtual void clear(){}
     virtual DepartmentComponent* getComponent(int componentIndex) { return nullptr; }
     virtual void displayEmployeeInfo() {}
     virtual int numberOfLeaves() {return 0;}
@@ -92,6 +93,7 @@ public:
     bool contains(DepartmentComponent* component) override;
     int find(DepartmentComponent* component) override;
     void setComponent(DepartmentComponent* component,int index)override;
+    void clear()override;
     DepartmentComponent* getComponent(int componentIndex) override
     {
         return (DepartmentComponent*)children[componentIndex];

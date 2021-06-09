@@ -70,6 +70,15 @@ void Departments::setComponent(DepartmentComponent *component, int index)
     children[index] = component;
 }
 
+void Departments::clear()
+{
+    int size = numberOfLeaves();
+    for (int i = 0; i < size; i++)
+    {
+        this->remove(children[0]);
+    }
+}
+
 void Departments::displayEmployeeInfo()
 {
     for (auto i : children)

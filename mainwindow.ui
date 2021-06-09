@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
+    <width>513</width>
     <height>413</height>
    </rect>
   </property>
@@ -304,7 +304,7 @@
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>280</y>
+      <y>310</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -320,7 +320,7 @@
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>310</y>
+      <y>340</y>
       <width>81</width>
       <height>23</height>
      </rect>
@@ -329,13 +329,42 @@
      <string>Сохранить</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="loadLE">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>20</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="inputMask">
+     <string/>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="loadBtn">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>50</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Загрузить</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>514</width>
+     <width>513</width>
      <height>21</height>
     </rect>
    </property>

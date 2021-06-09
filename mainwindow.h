@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QList>
 #include <QMap>
+#include <QMessageBox>
 #include <QTreeWidgetItem>
 #include <QTimer>
 #include "Parser.h"
@@ -24,7 +25,7 @@ private:
     void deleteItem(QTreeWidgetItem *itm,bool toPush);
     void addExistingItem(DepartmentComponent* itm, int index, bool toPush);
     void fillItems();
-
+    void clearItems();
 private slots:
     void checkUndoRedoButtons();
 
@@ -44,6 +45,8 @@ private slots:
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
     void on_saveBtn_clicked();
+
+    void on_loadBtn_clicked();
 
 private:
     Ui::MainWindow *ui;

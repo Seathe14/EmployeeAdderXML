@@ -8,9 +8,10 @@
 #include <algorithm>
 #include "pugixml/pugixml.hpp"
 #include "departmentcomponent.h"
-#define TODELETE 1
-#define TOADD 2
-
+#define TODELETEEMPLOYEE 1
+#define TOADDEMPLOYEE 2
+#define TOADDDEPARTMENT 3
+#define TODELETEDEPARTMENT 4
 class parsedBase
 {
 public:
@@ -20,15 +21,13 @@ public:
     bool isUndoEmpty() { return undoStack.empty();}
     bool isRedoEmpty() { return redoStack.empty();}
     void appendEmployeee(pugi::xml_node, std::string surname,std::string name,std::string middleName,std::string functionInDep,std::string salary);
-    void deleteRecord(DepartmentComponent* toDelete, int index);
+    void deleteRecord(DepartmentComponent* toDelete, int index,int component);
     std::pair<DepartmentComponent*,int> getUndoTopItem(int action);
     std::pair<DepartmentComponent*,int> peekRedoItem();
     std::pair<DepartmentComponent*,int> getRedoTopItem(int action);
     void setToPush(bool toPush) {this->toPush = toPush;}
-    void saveChanges(std::string fileName)
-    {
-        doc.save_file(fileName.c_str(),"   ");
-    }
+    void loadFile(std::string fileName);
+    void saveFile(std::string fileName);
     ~parsedBase()
     {
 
