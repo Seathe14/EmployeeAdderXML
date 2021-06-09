@@ -88,11 +88,13 @@ void parsedBase::loadFile(std::string fileName)
     auto result = doc.load_file(fileName.c_str());
     if(result.status!=pugi::status_ok)
         return;
+
     changes.clear();
+    current = 0;
+    departments->clear();
     pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
-    departments->clear();
     std::ostringstream oss;
     oss.str("");
     oss << "//department";
