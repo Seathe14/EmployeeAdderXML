@@ -22,12 +22,11 @@ public:
 
 
 private:
-    void deleteItem(QTreeWidgetItem *itm,bool toPush);
-    void addExistingItem(DepartmentComponent* itm, int index, bool toPush);
+    void deleteItem(QTreeWidgetItem *itm);
+    void addEmployeeItem();
     void fillItems();
     void clearItems();
 private slots:
-    void checkUndoRedoButtons();
 
     void on_addEmplBtn_clicked();
 
@@ -41,7 +40,6 @@ private slots:
 
     void on_redoBtn_clicked();
 
-
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
     void on_saveBtn_clicked();
@@ -50,12 +48,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    enum actions{DeleteEmployee,DeleteDepartment,AddEmployee,AddDepartment};
     QMap<QTreeWidgetItem*, DepartmentComponent*> departmentItems;
     QMap<QTreeWidgetItem*, DepartmentComponent*> employeeItems;
-    std::stack<actions>undoActions;
-    std::stack<actions>redoActions;
-    QTimer *timer;
     parsedBase pb;
 };
 #endif // MAINWINDOW_H

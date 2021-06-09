@@ -1,6 +1,25 @@
 #include "departmentcomponent.h"
 
 
+Departments::Departments(const Departments &toCopy)
+{
+    if(toCopy.getParent() == nullptr)
+    {
+        for(int i =0;i<toCopy.children.size();i++)
+        {
+            std::string name = dynamic_cast<Departments*>(toCopy.children[i])->getName();
+            DepartmentComponent* newDep = new Departments(name);
+            this->add(newDep);
+            for(int j =0;j<toCopy.children[i]->numberOfLeaves();j++)
+            {
+                DepartmentComponent* toPush = new Employee (dynamic_cast<Employee&>(*toCopy.children[i]->getComponent(j)));
+                newDep->add(toPush);
+            }
+
+        }
+    }
+}
+
 void Departments::add(DepartmentComponent *component)
 {
       this->children.push_back(component);
@@ -22,54 +41,6 @@ void Departments::remove(DepartmentComponent *component)
     delete component;
 }
 
-void Departments::insert(DepartmentComponent *component, int index)
-{
-    if(this->numberOfLeaves() < index)
-    {
-        auto it = this->children.end()-1;
-        this->children.insert(it,component);
-    }
-    else
-    {
-        auto it = this->children.begin() + index;
-        this->children.insert(it, component);
-    }
-    component->setParent(this);
-    if (component->getParent() != nullptr)
-    {
-        numOfEmployees++;
-    }
-}
-
-bool Departments::contains(DepartmentComponent *component)
-{
-    for(int i =0;i<this->numOfEmployees;i++)
-    {
-        if(this->getComponent(i) == component)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-int Departments::find(DepartmentComponent *component)
-{
-    for(int i =0;i<this->numOfEmployees;i++)
-    {
-        if(this->getComponent(i) == component)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
-void Departments::setComponent(DepartmentComponent *component, int index)
-{
-    children[index] = component;
-}
-
 void Departments::clear()
 {
     int size = numberOfLeaves();
@@ -79,14 +50,6 @@ void Departments::clear()
     }
 }
 
-void Departments::displayEmployeeInfo()
-{
-    for (auto i : children)
-    {
-        DepartmentComponent* employeeInfo = i;
-        employeeInfo->displayEmployeeInfo();
-    }
-}
 
 float Departments::countAvgSalary()
 {
