@@ -6,9 +6,9 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(checkUndoRedoButtons()));
-    timer->start(35);
+    //timer = new QTimer(this);
+    //connect(timer,SIGNAL(timeout()),this,SLOT(checkUndoRedoButtons()));
+    //timer->start(35);
     //fillItems();
 }
 
@@ -123,7 +123,8 @@ void MainWindow::on_addEmplBtn_clicked()
         thisDepartment = departmentItems.value(ui->treeWidget->currentItem()->parent());
     }
     undoActions.push(DeleteEmployee);
-    thisDepartment->add(toAdd);
+    //thisDepartment->add(toAdd);
+    toAdd->setParent(thisDepartment);
     pb.addRecord(toAdd);
 }
 
@@ -224,8 +225,11 @@ void MainWindow::on_addDepBtn_clicked()
 
 void MainWindow::on_undoBtn_clicked()
 {
-    actions toPerformUndo = undoActions.top();
-    //pb.undo();
+    //actions toPerformUndo = undoActions.top(); 
+    pb.undo();
+    clearItems();
+    //pb.loadFile(ui->loadLE->text().toStdString());
+    fillItems();
     //pb.redo();
     //undoActions.pop();
     //if(toPerformUndo == AddEmployee)
@@ -271,52 +275,57 @@ void MainWindow::on_undoBtn_clicked()
 
 void MainWindow::on_redoBtn_clicked()
 {
-    actions toPerformRedo = redoActions.top();
-    redoActions.pop();
-    if(toPerformRedo == DeleteEmployee)
-    {
-        std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TOADDEMPLOYEE);
-        for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
-        {
-            if(i.value() == redoItem.first)
-            {
-                deleteItem(i.key(),true);
-                break;
-            }
-        }
-    }
-    else if(toPerformRedo == DeleteDepartment)
-    {
-        std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TOADDEMPLOYEE);
-
-        for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
-        {
-            if(i.value() == redoItem.first)
-            {
-                deleteItem(i.key(),true);
-                break;
-            }
-        }
-    }
-    else if(toPerformRedo == AddEmployee)
-    {
-        std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TODELETEEMPLOYEE);
-        if(redoItem.first->getParent() == nullptr)
-            return;
-        addExistingItem(redoItem.first,redoItem.second,true);
-    }
-    else if(toPerformRedo == AddDepartment)
-    {
-        std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TODELETEEMPLOYEE);
-        addExistingItem(redoItem.first,redoItem.second,true);
-    }
+    //actions toPerformRedo = redoActions.top();
+    //redoActions.pop();
+    pb.redo();
+    clearItems();
+    //pb.loadFile(ui->loadLE->text().toStdString());
+    fillItems();
+    //if(toPerformRedo == DeleteEmployee)
+    //{
+    //    std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TOADDEMPLOYEE);
+    //    for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
+    //    {
+    //        if(i.value() == redoItem.first)
+    //        {
+    //            deleteItem(i.key(),true);
+    //            break;
+    //        }
+    //    }
+    //}
+    //else if(toPerformRedo == DeleteDepartment)
+    //{
+    //    std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TOADDEMPLOYEE);
+    //
+    //    for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
+    //    {
+    //        if(i.value() == redoItem.first)
+    //        {
+    //            deleteItem(i.key(),true);
+    //            break;
+    //        }
+    //    }
+    //}
+    //else if(toPerformRedo == AddEmployee)
+    //{
+    //    std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TODELETEEMPLOYEE);
+    //    if(redoItem.first->getParent() == nullptr)
+    //        return;
+    //    addExistingItem(redoItem.first,redoItem.second,true);
+    //}
+    //else if(toPerformRedo == AddDepartment)
+    //{
+    //    std::pair<DepartmentComponent*,int> redoItem = pb.getRedoTopItem(TODELETEEMPLOYEE);
+    //    addExistingItem(redoItem.first,redoItem.second,true);
+    //}
 }
 
 
 
 void MainWindow::on_saveBtn_clicked()
 {
-    pb.saveFile(ui->saveLE->text().toStdString());
+    //pb.saveFile(ui->saveLE->text().toStdString());
+    pb.fileSave(ui->saveLE->text().toStdString());
 }
 
 void MainWindow::on_loadBtn_clicked()

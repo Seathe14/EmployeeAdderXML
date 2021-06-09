@@ -4,83 +4,94 @@
 parsedBase::parsedBase()
 {
     departments = new Departments();
-    //changes.emplace_back(std::make_shared<Memento>(departments->makeClone()));
     current = 0;
-    //doc.load_file("tst.xml");
 }
 
 std::shared_ptr<Memento> parsedBase::addRecord(DepartmentComponent *toAdd)
 {
-    auto m = std::make_shared<Memento>(departments->makeClone());
+    //pugi::xml_node node =  doc.append_copy(doc.child("departments"));
+    //auto m = std::make_shared<Memento>(departments->makeClone(),doc.append_copy(doc.child("departments")));
+    //doc.remove_children();
     if(toAdd->getParent() == nullptr) // if it's a new department
     {
         departments->add(toAdd);
-        //auto m = std::make_shared<Memento>(departments->makeClone());
-        changes.push_back(m);
+        auto m = std::make_shared<Memento>(departments->makeClone(),doc.append_copy(doc.child("departments")));
         current++;
-        std::ostringstream oss;
-        std::string departmentName = dynamic_cast<Departments*>(toAdd)->getName();
-        oss << "//departments";
-        std::ostringstream attribute;
-        attribute << "name";
-        pugi::xpath_node departmentsNode = doc.select_node(oss.str().c_str());
-        pugi::xml_node childNode = departmentsNode.node().append_child("department");
-        childNode.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
-        childNode.append_child("employments");
-        std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
-        undoStack.push_back(pairToPush);
+        changes.push_back(m);
         return m;
+        //auto m = std::make_shared<Memento>(departments->makeClone());
+        //changes.push_back(m);
+        //current++;
+        //std::ostringstream oss;
+        //std::string departmentName = dynamic_cast<Departments*>(toAdd)->getName();
+        //oss << "//departments";
+        //std::ostringstream attribute;
+        //attribute << "name";
+        //pugi::xpath_node departmentsNode = doc.select_node(oss.str().c_str());
+        //pugi::xml_node childNode = departmentsNode.node().append_child("department");
+        //childNode.append_attribute(attribute.str().c_str()).set_value(departmentName.c_str());
+        //childNode.append_child("employments");
+        //std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
+        //undoStack.push_back(pairToPush);
+        ////return m;
     }
     else                             //if it's a new employee of an existing department
     {
-        std::ostringstream oss;
-        std::string departmentName = dynamic_cast<Departments*>(toAdd->getParent())->getName();
-        std::string surname = dynamic_cast<Employee*>(toAdd)->getSurname();
-        std::string name = dynamic_cast<Employee*>(toAdd)->getName();
-        std::string middleName = dynamic_cast<Employee*>(toAdd)->getMiddleName();
-        std::string functionInDep = dynamic_cast<Employee*>(toAdd)->getFunctionInDep();
-        std::string salary = std::to_string(dynamic_cast<Employee*>(toAdd)->getSalary());
-        oss << "//department[@name = '" << departmentName << "']/employments";
-        pugi::xpath_node employmentsNode = doc.select_node(oss.str().c_str());
-        employmentsNode.node().append_child("employment");
-        pugi::xml_node childNode = employmentsNode.node().last_child();
-        appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
-        std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
-        undoStack.push_back(pairToPush);
+        toAdd->getParent()->add(toAdd);
+        //std::ostringstream oss;
+        //std::string departmentName = dynamic_cast<Departments*>(toAdd->getParent())->getName();
+        //std::string surname = dynamic_cast<Employee*>(toAdd)->getSurname();
+        //std::string name = dynamic_cast<Employee*>(toAdd)->getName();
+        //std::string middleName = dynamic_cast<Employee*>(toAdd)->getMiddleName();
+        //std::string functionInDep = dynamic_cast<Employee*>(toAdd)->getFunctionInDep();
+        //std::string salary = std::to_string(dynamic_cast<Employee*>(toAdd)->getSalary());
+        //oss << "//department[@name = '" << departmentName << "']/employments";
+        //pugi::xpath_node employmentsNode = doc.select_node(oss.str().c_str());
+        //employmentsNode.node().append_child("employment");
+        //pugi::xml_node childNode = employmentsNode.node().last_child();
+        //appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
+        //std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
+        //undoStack.push_back(pairToPush);
         //auto m = std::make_shared<Memento>(departments->makeClone());
-        current ++;
+        auto m = std::make_shared<Memento>(departments->makeClone(),doc.append_copy(doc.child("departments")));
+        current++;
         changes.push_back(m);
         return m;
     }
-    //return nullptr;
+    return nullptr;
 }
 
-//std::shared_ptr<Memento> parsedBase::undo()
-//{
-//    if(current>0)
-//    {
-//        current--;
-//        auto m = changes[current];
-//        departments = m->departments;
-//        return m;
-//    }
-//    return {};
-//}
+std::shared_ptr<Memento> parsedBase::undo()
+{
+    if(current>0)
+    {
+        current--;
+        auto m = changes[current];
+        departments = m->departments->makeClone();;
+        //doc.remove_children();
+        //doc.append_copy(changes[current]->node);
+        return m;
+    }
+    return {};
+}
 //
-//std::shared_ptr<Memento> parsedBase::redo()
-//{
-//    if(current + 1 < changes.size())
-//    {
-//        current ++;
-//        auto m = changes[current];
-//        departments = m->departments;
-//        return m;
-//    }
-//    return {};
-//}
+std::shared_ptr<Memento> parsedBase::redo()
+{
+    if(current + 1 < changes.size())
+    {
+        current++;
+        auto m = changes[current];
+        departments = m->departments->makeClone();
+        return m;
+    }
+    return {};
+}
 
 void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
 {
+    pugi::xml_node node =  doc.append_copy(doc.child("departments"));
+    auto m = std::make_shared<Memento>(departments->makeClone(),doc.append_copy(doc.child("departments")));
+    changes.push_back(m);
     if(dynamic_cast<Departments*>(toAdd->getParent())->getName() == "") // if we're inserting a department which has a reference to parent
     {
         std::ostringstream oss;
@@ -174,84 +185,87 @@ void parsedBase::appendEmployeee(pugi::xml_node childNode, std::string surname, 
 
 void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index, int component)
 {
-    auto m = std::make_shared<Memento>(departments->makeClone());
-    changes.push_back(m);
+    pugi::xml_node node =  doc.append_copy(doc.child("departments"));
+
     if(toDelete->getParent()!=nullptr)
     {
         if(component == TODELETEDEPARTMENT)
         {
-            std::string departmentName = dynamic_cast<Departments*>(toDelete)->getName();
-            std::ostringstream oss;
-            oss << "//department[@name='" << departmentName <<"']";
-            pugi::xpath_node departmentNode = doc.select_node(oss.str().c_str());
-            DepartmentComponent* copyOfDeletedDepartment = toDelete->makeClone();
-            auto copiedUndoStack = undoStack;
-            auto copiedRedoStack = redoStack;
-            //int redoStackSize = copiedRedoStack.size();
-            int undoStackSize = copiedUndoStack.size();
-            for(int i =0;i<redoStack.size();i++)
-            {
-                if(redoStack.back().first == toDelete)
-                    redoStack.back().first = copyOfDeletedDepartment;
-                int ind;
-                if(redoStack[i].first->getParent() == toDelete)
-                {
-
-                    redoStack[i].first->setParent(copyOfDeletedDepartment);
-                }
-                //if((ind = toDelete->find(redoStack[i].first))!=-1)
-                //{
-                //    if(ind!=-1)
-                //    {
-                //        DepartmentComponent* copiedEmployee = toDelete->getComponent(ind)->makeClone();
-                //        copiedEmployee->setParent(redoStack.back().first);
-                //        redoStack.back().first->setComponent(copiedEmployee,ind);
-                //    }
-                //}
-
-            }
-            for(int i = 0;i<undoStackSize;i++)
-            {
-                std::pair<DepartmentComponent*,int> copiedPair = copiedUndoStack.back();
-                copiedUndoStack.pop_back();
-                if(copiedPair.first->getParent() == toDelete)
-                {
-                    copiedPair.first->setParent(copyOfDeletedDepartment);
-                }
-            }
-            departmentNode.node().parent().remove_child(departmentNode.node());
-            std::pair<DepartmentComponent*,int> pairToPush(copyOfDeletedDepartment,index);
-            if(toPush)
-                undoStack.push_back(pairToPush);
+            //std::string departmentName = dynamic_cast<Departments*>(toDelete)->getName();
+            //std::ostringstream oss;
+            //oss << "//department[@name='" << departmentName <<"']";
+            //pugi::xpath_node departmentNode = doc.select_node(oss.str().c_str());
+            //DepartmentComponent* copyOfDeletedDepartment = toDelete->makeClone();
+            //auto copiedUndoStack = undoStack;
+            //auto copiedRedoStack = redoStack;
+            ////int redoStackSize = copiedRedoStack.size();
+            //int undoStackSize = copiedUndoStack.size();
+            //for(int i =0;i<redoStack.size();i++)
+            //{
+            //    if(redoStack.back().first == toDelete)
+            //        redoStack.back().first = copyOfDeletedDepartment;
+            //    int ind;
+            //    if(redoStack[i].first->getParent() == toDelete)
+            //    {
+            //
+            //        redoStack[i].first->setParent(copyOfDeletedDepartment);
+            //    }
+            //    //if((ind = toDelete->find(redoStack[i].first))!=-1)
+            //    //{
+            //    //    if(ind!=-1)
+            //    //    {
+            //    //        DepartmentComponent* copiedEmployee = toDelete->getComponent(ind)->makeClone();
+            //    //        copiedEmployee->setParent(redoStack.back().first);
+            //    //        redoStack.back().first->setComponent(copiedEmployee,ind);
+            //    //    }
+            //    //}
+            //
+            //}
+            //for(int i = 0;i<undoStackSize;i++)
+            //{
+            //    std::pair<DepartmentComponent*,int> copiedPair = copiedUndoStack.back();
+            //    copiedUndoStack.pop_back();
+            //    if(copiedPair.first->getParent() == toDelete)
+            //    {
+            //        copiedPair.first->setParent(copyOfDeletedDepartment);
+            //    }
+            //}
+            //departmentNode.node().parent().remove_child(departmentNode.node());
+            //std::pair<DepartmentComponent*,int> pairToPush(copyOfDeletedDepartment,index);
+            //if(toPush)
+            //    undoStack.push_back(pairToPush);
             departments->remove(toDelete);
         }
         else
         {
-            std::ostringstream oss;
-            std::string departmentName = dynamic_cast<Departments*>(toDelete->getParent())->getName();
-            std::string surname = dynamic_cast<Employee*>(toDelete)->getSurname();
-            std::string name = dynamic_cast<Employee*>(toDelete)->getName();
-            std::string middleName = dynamic_cast<Employee*>(toDelete)->getMiddleName();
-            std::string functionInDep = dynamic_cast<Employee*>(toDelete)->getFunctionInDep();
-            std::string salary = std::to_string(dynamic_cast<Employee*>(toDelete)->getSalary());
-            oss << "//department[@name='" << departmentName <<"']//employment[name = '" << name << "'][surname='" << surname << "'][middleName = '" << middleName << "']"
-            << "[function ='" << functionInDep << "'][salary = '" << salary << "']";
-            pugi::xpath_node employeeNode = doc.select_node(oss.str().c_str());
-            employeeNode.node().parent().remove_child(employeeNode.node());
-            DepartmentComponent* copyOfDeletedEmployee = toDelete->makeClone();
-            std::pair<DepartmentComponent*,int> pairToPush(copyOfDeletedEmployee,index);
-            for(int i =0;i<redoStack.size();i++)
-            {
-                if(redoStack[i].first == toDelete)
-                {
-                    redoStack[i].first = copyOfDeletedEmployee;
-                }
-            }
-            if(toPush)
-                undoStack.push_back(pairToPush);
+            //std::ostringstream oss;
+            //std::string departmentName = dynamic_cast<Departments*>(toDelete->getParent())->getName();
+            //std::string surname = dynamic_cast<Employee*>(toDelete)->getSurname();
+            //std::string name = dynamic_cast<Employee*>(toDelete)->getName();
+            //std::string middleName = dynamic_cast<Employee*>(toDelete)->getMiddleName();
+            //std::string functionInDep = dynamic_cast<Employee*>(toDelete)->getFunctionInDep();
+            //std::string salary = std::to_string(dynamic_cast<Employee*>(toDelete)->getSalary());
+            //oss << "//department[@name='" << departmentName <<"']//employment[name = '" << name << "'][surname='" << surname << "'][middleName = '" << middleName << "']"
+            //<< "[function ='" << functionInDep << "'][salary = '" << salary << "']";
+            //pugi::xpath_node employeeNode = doc.select_node(oss.str().c_str());
+            //employeeNode.node().parent().remove_child(employeeNode.node());
+            //DepartmentComponent* copyOfDeletedEmployee = toDelete->makeClone();
+            //std::pair<DepartmentComponent*,int> pairToPush(copyOfDeletedEmployee,index);
+            //for(int i =0;i<redoStack.size();i++)
+            //{
+            //    if(redoStack[i].first == toDelete)
+            //    {
+            //        redoStack[i].first = copyOfDeletedEmployee;
+            //    }
+            //}
+            //if(toPush)
+            //    undoStack.push_back(pairToPush);
             toDelete->getParent()->remove(toDelete);
         }
     }
+    auto m = std::make_shared<Memento>(departments->makeClone(),doc.append_copy(doc.child("departments")));
+    changes.push_back(m);
+    current++;
 }
 
 std::pair<DepartmentComponent *, int> parsedBase::getUndoTopItem(int action)
@@ -305,24 +319,55 @@ void parsedBase::loadFile(std::string fileName)
                 }
                 oss.str("");
             }
-            auto m = std::make_shared<Memento>(departments->makeClone());
             pugi::xml_node node =  doc.append_copy(doc.child("departments"));
-            pugi::xml_document docs;
-            pugi::xml_document copy;
-            copy.reset(this->doc);
-            docs.reset(doc);
-            doc.remove_children();
+            node = doc.child("departments");
+            //node.append_copy(node);
+            auto m = std::make_shared<Memento>(departments->makeClone(),doc.append_copy(doc.child("departments")));
+            //pugi::xml_node node =  doc.append_copy(doc.child("departments"));
+            //pugi::xml_document docs;
+            //pugi::xml_document copy;
+            //copy.reset(this->doc);
+            //docs.reset(doc);
+            //doc.remove_children();
             //doc.reset(docs);
             //
-            doc.append_copy(node);
+            //doc.append_copy(node);
             changes.push_back(m);
-            current++;
+            //current++;
 }
 
 void parsedBase::saveFile(std::string fileName)
 {
     fileName.append(".xml");
 
+    doc.save_file(fileName.c_str(),"   ");
+}
+
+void parsedBase::fileSave(std::string fileName)
+{
+    doc.remove_children();
+    pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
+    doc.append_child("departments");
+    pugi::xml_node departmentsNode = doc.child("departments");
+    for(int i =0;i<departments->numberOfLeaves();i++)
+    {
+         //pugi::xml_attribute attribute("name");
+         departmentsNode.append_child("department").append_attribute("name").set_value(dynamic_cast<Departments*>(departments->getComponent(i))->getName().c_str());
+         pugi::xml_node departmentNode = departmentsNode.find_child_by_attribute("department","name",(dynamic_cast<Departments*>(departments->getComponent(i))->getName().c_str()));
+         pugi::xml_node employmentsNode = departmentNode.append_child("employments");
+         for(int j = 0;j<departments->getComponent(i)->numberOfLeaves();j++)
+         {
+             pugi::xml_node employmentNode = employmentsNode.append_child("employment");
+             employmentNode.append_child("surname").text().set(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getSurname().c_str());
+             employmentNode.append_child("name").text().set(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getName().c_str());
+             employmentNode.append_child("middleName").text().set(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getMiddleName().c_str());
+             employmentNode.append_child("function").text().set(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getFunctionInDep().c_str());
+             employmentNode.append_child("salary").text().set(std::to_string(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getSalary()).c_str());
+         }
+    }
+    fileName = fileName + ".xml";
     doc.save_file(fileName.c_str(),"   ");
 }
 

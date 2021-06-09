@@ -17,11 +17,12 @@ class Memento
 {
 private:
     DepartmentComponent* departments;
-    //pugi::xml_document doc;
+    //pugi::xml_node node;
 public:
-    Memento(DepartmentComponent* depComponent)
+    Memento(DepartmentComponent* depComponent,pugi::xml_node nodeToCopy)
     {
         departments = depComponent;
+        //node = nodeToCopy;
     }
     friend class parsedBase;
 };
@@ -43,6 +44,7 @@ public:
     void setToPush(bool toPush) {this->toPush = toPush;}
     void loadFile(std::string fileName);
     void saveFile(std::string fileName);
+    void fileSave(std::string fileName);
     //void recordDepartments
     ~parsedBase()
     {
