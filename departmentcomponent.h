@@ -71,14 +71,26 @@ public:
     float getAvgSalary() { return avgSalary; }
     DepartmentComponent* makeClone() override
     {
-        Departments* newDep = new Departments(this->name);
-        newDep->setParent(this->parent);
-        for (int i = 0; i < this->children.size(); i++)
+        if(this->name != "")
         {
-            DepartmentComponent* employeeToClone = this->children[i]->makeClone();
-            newDep->add(employeeToClone);
+            Departments* newDep = new Departments(this->name);
+            newDep->setParent(this->parent);
+            for (int i = 0; i < this->children.size(); i++)
+            {
+                DepartmentComponent* employeeToClone = this->children[i]->makeClone();
+                newDep->add(employeeToClone);
+            }
+            return newDep;
         }
-        return newDep;
+        else
+        {
+            Departments* newDep = new Departments();
+            for(int i =0;i<this->children.size();i++)
+            {
+                newDep->children.push_back(this->children[i]->makeClone());
+            }
+            return newDep;
+        }
     }
     int getNumOfEmployees() {return numOfEmployees;}
 private:

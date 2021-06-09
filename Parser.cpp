@@ -4,14 +4,20 @@
 parsedBase::parsedBase()
 {
     departments = new Departments();
+    //changes.emplace_back(std::make_shared<Memento>(departments->makeClone()));
+    current = 0;
     //doc.load_file("tst.xml");
 }
 
-void parsedBase::addRecord(DepartmentComponent *toAdd)
+std::shared_ptr<Memento> parsedBase::addRecord(DepartmentComponent *toAdd)
 {
+    auto m = std::make_shared<Memento>(departments->makeClone());
     if(toAdd->getParent() == nullptr) // if it's a new department
     {
         departments->add(toAdd);
+        //auto m = std::make_shared<Memento>(departments->makeClone());
+        changes.push_back(m);
+        current++;
         std::ostringstream oss;
         std::string departmentName = dynamic_cast<Departments*>(toAdd)->getName();
         oss << "//departments";
@@ -23,6 +29,7 @@ void parsedBase::addRecord(DepartmentComponent *toAdd)
         childNode.append_child("employments");
         std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
         undoStack.push_back(pairToPush);
+        return m;
     }
     else                             //if it's a new employee of an existing department
     {
@@ -40,9 +47,37 @@ void parsedBase::addRecord(DepartmentComponent *toAdd)
         appendEmployeee(childNode,surname,name,middleName,functionInDep,salary);
         std::pair<DepartmentComponent*,int> pairToPush(toAdd,toAdd->getParent()->numberOfLeaves()-1);
         undoStack.push_back(pairToPush);
-
+        //auto m = std::make_shared<Memento>(departments->makeClone());
+        current ++;
+        changes.push_back(m);
+        return m;
     }
+    //return nullptr;
 }
+
+//std::shared_ptr<Memento> parsedBase::undo()
+//{
+//    if(current>0)
+//    {
+//        current--;
+//        auto m = changes[current];
+//        departments = m->departments;
+//        return m;
+//    }
+//    return {};
+//}
+//
+//std::shared_ptr<Memento> parsedBase::redo()
+//{
+//    if(current + 1 < changes.size())
+//    {
+//        current ++;
+//        auto m = changes[current];
+//        departments = m->departments;
+//        return m;
+//    }
+//    return {};
+//}
 
 void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
 {
@@ -124,6 +159,7 @@ void parsedBase::insertRecord(DepartmentComponent *toAdd, int index)
             undoStack.push_back(pairToPush);
         }
     }
+
 }
 
 void parsedBase::appendEmployeee(pugi::xml_node childNode, std::string surname, std::string name, std::string middleName, std::string functionInDep, std::string salary)
@@ -138,6 +174,8 @@ void parsedBase::appendEmployeee(pugi::xml_node childNode, std::string surname, 
 
 void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index, int component)
 {
+    auto m = std::make_shared<Memento>(departments->makeClone());
+    changes.push_back(m);
     if(toDelete->getParent()!=nullptr)
     {
         if(component == TODELETEDEPARTMENT)
@@ -267,11 +305,24 @@ void parsedBase::loadFile(std::string fileName)
                 }
                 oss.str("");
             }
+            auto m = std::make_shared<Memento>(departments->makeClone());
+            pugi::xml_node node =  doc.append_copy(doc.child("departments"));
+            pugi::xml_document docs;
+            pugi::xml_document copy;
+            copy.reset(this->doc);
+            docs.reset(doc);
+            doc.remove_children();
+            //doc.reset(docs);
+            //
+            doc.append_copy(node);
+            changes.push_back(m);
+            current++;
 }
 
 void parsedBase::saveFile(std::string fileName)
 {
     fileName.append(".xml");
+
     doc.save_file(fileName.c_str(),"   ");
 }
 

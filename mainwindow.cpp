@@ -225,46 +225,48 @@ void MainWindow::on_addDepBtn_clicked()
 void MainWindow::on_undoBtn_clicked()
 {
     actions toPerformUndo = undoActions.top();
-    undoActions.pop();
-    if(toPerformUndo == AddEmployee)
-    {
-        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETEEMPLOYEE);
-        addExistingItem(undoItem.first,undoItem.second,false);
-        redoActions.push(DeleteEmployee);
-    }
-    else if(toPerformUndo == AddDepartment)
-    {
-        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETEEMPLOYEE);
-        addExistingItem(undoItem.first,undoItem.second,false);
-        redoActions.push(DeleteDepartment);
-    }
-    else if(toPerformUndo == DeleteEmployee)
-    {
-        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADDEMPLOYEE);
-        for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
-        {
-            if(i.value() == undoItem.first)
-            {
-                deleteItem(i.key(),false);
-                break;
-            }
-        }
-        redoActions.push(AddEmployee);
-    }
-    else if(toPerformUndo == DeleteDepartment)
-    {
-        std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADDDEPARTMENT);
-        for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
-        {
-            if(i.value() == undoItem.first)
-            {
-                deleteItem(i.key(),false);
-                break;
-            }
-        }
-        redoActions.push(AddDepartment);
-
-    }
+    //pb.undo();
+    //pb.redo();
+    //undoActions.pop();
+    //if(toPerformUndo == AddEmployee)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETEEMPLOYEE);
+    //    addExistingItem(undoItem.first,undoItem.second,false);
+    //    redoActions.push(DeleteEmployee);
+    //}
+    //else if(toPerformUndo == AddDepartment)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TODELETEEMPLOYEE);
+    //    addExistingItem(undoItem.first,undoItem.second,false);
+    //    redoActions.push(DeleteDepartment);
+    //}
+    //else if(toPerformUndo == DeleteEmployee)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADDEMPLOYEE);
+    //    for(auto i = employeeItems.begin();i!=employeeItems.end();i++)
+    //    {
+    //        if(i.value() == undoItem.first)
+    //        {
+    //            deleteItem(i.key(),false);
+    //            break;
+    //        }
+    //    }
+    //    redoActions.push(AddEmployee);
+    //}
+    //else if(toPerformUndo == DeleteDepartment)
+    //{
+    //    std::pair<DepartmentComponent*,int> undoItem = pb.getUndoTopItem(TOADDDEPARTMENT);
+    //    for(auto i = departmentItems.begin();i!=departmentItems.end();i++)
+    //    {
+    //        if(i.value() == undoItem.first)
+    //        {
+    //            deleteItem(i.key(),false);
+    //            break;
+    //        }
+    //    }
+    //    redoActions.push(AddDepartment);
+    //
+    //}
 }
 
 void MainWindow::on_redoBtn_clicked()
