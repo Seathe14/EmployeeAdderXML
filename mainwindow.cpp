@@ -37,6 +37,7 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm)
         pb.deleteRecord(emplToDelete,index,TODELETEEMPLOYEE);
         employeeItems.remove(itm);
         itm->parent()->removeChild(itm);
+        delete itm;
     }
 }
 
@@ -110,14 +111,18 @@ void MainWindow::clearItems()
 {
     departmentItems.clear();
     employeeItems.clear();
-    for(int i =0;i<ui->treeWidget->topLevelItemCount();i++)
+    int count = ui->treeWidget->topLevelItemCount();
+    for(int i =0;i<count;i++)
     {
-        for(int j =0;j<ui->treeWidget->topLevelItem(i)->childCount();j++)
+        for(int j =0;j<ui->treeWidget->topLevelItem(0)->childCount();j++)
         {
-            QTreeWidgetItem* child = ui->treeWidget->topLevelItem(i)->child(j);
-            ui->treeWidget->topLevelItem(i)->removeChild(child);
+            QTreeWidgetItem* child = ui->treeWidget->topLevelItem(0)->child(j);
+            ui->treeWidget->topLevelItem(0)->removeChild(child);
+            delete child;
         }
-        ui->treeWidget->removeItemWidget(ui->treeWidget->takeTopLevelItem(i),0);
+        QTreeWidgetItem* toplevelItem = ui->treeWidget->takeTopLevelItem(0);
+        ui->treeWidget->removeItemWidget(toplevelItem,0);
+        delete toplevelItem;
     }
     ui->treeWidget->clear();
 }
@@ -147,6 +152,14 @@ void MainWindow::on_treeWidget_itemActivated(QTreeWidgetItem *item, int column)
 
 void MainWindow::on_delEmplBtn_clicked()
 {
+    if(ui->treeWidget->currentItem() == nullptr)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Please choose item to delete");
+        msgBox.setWindowTitle("Error");
+        msgBox.exec();
+        return;
+    }
     QTreeWidgetItem *itm  = ui->treeWidget->currentItem();
     deleteItem(itm);
 }
@@ -191,12 +204,14 @@ void MainWindow::on_redoBtn_clicked()
 
 void MainWindow::on_saveBtn_clicked()
 {
-    pb.saveFile(ui->saveLE->text().toStdString());
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Save file"),"default",tr("xml (*.xml)"));
+    pb.saveFile(fileName.toStdString());
 }
 
 void MainWindow::on_loadBtn_clicked()
 {
     clearItems();
-    pb.loadFile(ui->loadLE->text().toStdString());
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open file"),"tst.xml",tr("xml (*.xml)"));
+    pb.loadFile(fileName.toStdString());
     fillItems();
 }

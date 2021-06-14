@@ -23,7 +23,7 @@ public:
     virtual int numberOfLeaves() {return 0;}
     virtual float countAvgSalary() { return 0; }
     //virtual DepartmentComponent* makeClone() = 0;
-    virtual ~DepartmentComponent() {};
+    virtual ~DepartmentComponent() {}
 };
 
 class Employee : public DepartmentComponent

@@ -300,26 +300,10 @@
      <string>Сотрудник</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="saveLE">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>310</y>
-      <width>81</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="inputMask">
-     <string/>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="saveBtn">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>400</x>
       <y>340</y>
       <width>81</width>
       <height>23</height>
@@ -329,27 +313,11 @@
      <string>Сохранить</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="loadLE">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>20</y>
-      <width>81</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="inputMask">
-     <string/>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="loadBtn">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>50</y>
+      <x>400</x>
+      <y>310</y>
       <width>81</width>
       <height>23</height>
      </rect>

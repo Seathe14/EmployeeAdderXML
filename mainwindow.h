@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QTreeWidgetItem>
 #include <QTimer>
+#include <QFileDialog>
 #include "Parser.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

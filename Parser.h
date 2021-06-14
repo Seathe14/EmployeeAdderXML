@@ -20,6 +20,7 @@ public:
     {
         departments = depComponent;
     }
+    ~Memento() {delete departments;}
     friend class parsedBase;
 };
 class parsedBase
@@ -34,7 +35,7 @@ public:
     void loadFile(std::string fileName);
     void saveFile(std::string fileName);
     DepartmentComponent* departments;
-    ~parsedBase(){}
+    ~parsedBase();
 private:
     std::vector<std::shared_ptr<Memento>> changes;
     int current;

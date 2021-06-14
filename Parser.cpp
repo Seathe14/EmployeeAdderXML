@@ -1,6 +1,7 @@
 #include "Parser.h"
 #include "pugixml/pugixml.hpp"
 #include <sstream>
+
 parsedBase::parsedBase()
 {
     departments = new Departments();
@@ -33,6 +34,7 @@ std::shared_ptr<Memento> parsedBase::undo()
     {
         current--;
         auto m = changes[current];
+        delete departments;
         departments = new Departments(dynamic_cast<Departments&>(*m->departments));
         return m;
     }
@@ -45,6 +47,7 @@ std::shared_ptr<Memento> parsedBase::redo()
     {
         current++;
         auto m = changes[current];
+        delete departments;
         departments = new Departments(dynamic_cast<Departments&>(*m->departments));
         return m;
     }
@@ -84,7 +87,7 @@ void parsedBase::deleteRecord(DepartmentComponent *toDelete, int index, int acti
 
 void parsedBase::loadFile(std::string fileName)
 {
-    fileName.append(".xml");
+    //fileName.append(".xml");
     auto result = doc.load_file(fileName.c_str());
     if(result.status!=pugi::status_ok)
         return;
@@ -148,7 +151,11 @@ void parsedBase::saveFile(std::string fileName)
              employmentNode.append_child("salary").text().set(std::to_string(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getSalary()).c_str());
          }
     }
-    fileName = fileName + ".xml";
     doc.save_file(fileName.c_str(),"   ");
+}
+
+parsedBase::~parsedBase()
+{
+    delete departments;
 }
 
