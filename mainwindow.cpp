@@ -43,6 +43,14 @@ void MainWindow::deleteItem(QTreeWidgetItem *itm)
 
 void MainWindow::addEmployeeItem()
 {
+    if(ui->treeWidget->currentItem() == nullptr)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Please, choose department where to add");
+        msgBox.setWindowTitle("Error");
+        msgBox.exec();
+        return;
+    }
     QTreeWidgetItem *child = new QTreeWidgetItem();
     child->setText(0,ui->surnameLE->text() + " " + ui->nameLE->text() + " " + ui->middleNameLE->text());
     std::string surname = ui->surnameLE->text().toStdString();
@@ -50,6 +58,8 @@ void MainWindow::addEmployeeItem()
     std::string middleName = ui->middleNameLE->text().toStdString();
     std::string functionInDep = ui->jobLE->text().toStdString();
     std::string salary = ui->salaryLE->text().toStdString();
+
+    //if(ui->salaryLE->text.toInt()
     if(surname == "" || name == "" || functionInDep == "" || salary == "")
     {
         QMessageBox msgBox;
@@ -58,6 +68,17 @@ void MainWindow::addEmployeeItem()
         msgBox.exec();
         return;
     }
+    bool ok;
+    int result = ui->salaryLE->text().toInt(&ok,10);
+    if(!ok)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Salary is integer");
+        msgBox.setWindowTitle("Error");
+        msgBox.exec();
+        return;
+    }
+    //if(salary.toInt)
     Employee* toAdd = new Employee(surname,name,middleName,functionInDep,atoi(salary.c_str()));
     employeeItems.insert(child,toAdd);
     DepartmentComponent* thisDepartment = nullptr;
@@ -77,7 +98,8 @@ void MainWindow::addEmployeeItem()
 
 void MainWindow::on_addEmplBtn_clicked()
 {
-    addEmployeeItem();
+    //if(ui->treeWidget->currentItem() != nullptr)
+     addEmployeeItem();
 }
 
 void MainWindow::fillItems()
