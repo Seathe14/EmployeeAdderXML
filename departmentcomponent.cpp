@@ -10,7 +10,7 @@ Departments::Departments(const Departments &toCopy)
             std::string name = dynamic_cast<Departments*>(toCopy.children[i])->getName();
             DepartmentComponent* newDep = new Departments(name);
             this->add(newDep);
-            for(int j =0;j<toCopy.children[i]->numberOfLeaves();j++)
+            for(int j =0;j<dynamic_cast<Departments*>(toCopy.children[i])->numberOfLeaves();j++)
             {
                 DepartmentComponent* toPush = new Employee (dynamic_cast<Employee&>(*toCopy.children[i]->getComponent(j)));
                 newDep->add(toPush);

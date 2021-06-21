@@ -108,7 +108,7 @@ void parsedBase::loadFile(std::string fileName)
         departments->add(new Departments(node.node().first_attribute().value()));
     }
     oss.str("");
-    for (int i = 0; i < departments->numberOfLeaves(); i++)
+    for (int i = 0; i < dynamic_cast<Departments*>(departments)->numberOfLeaves(); i++)
     {
         oss << "//department[@name='" << dynamic_cast<Departments*>(departments->getComponent(i))->getName() << "']//employment";
         for (pugi::xpath_node node : doc.select_nodes(oss.str().c_str()))
@@ -135,13 +135,13 @@ void parsedBase::saveFile(std::string fileName)
     decl.append_attribute("encoding") = "UTF-8";
     doc.append_child("departments");
     pugi::xml_node departmentsNode = doc.child("departments");
-    for(int i =0;i<departments->numberOfLeaves();i++)
+    for(int i =0;i<dynamic_cast<Departments*>(departments)->numberOfLeaves();i++)
     {
          //pugi::xml_attribute attribute("name");
          departmentsNode.append_child("department").append_attribute("name").set_value(dynamic_cast<Departments*>(departments->getComponent(i))->getName().c_str());
          pugi::xml_node departmentNode = departmentsNode.find_child_by_attribute("department","name",(dynamic_cast<Departments*>(departments->getComponent(i))->getName().c_str()));
          pugi::xml_node employmentsNode = departmentNode.append_child("employments");
-         for(int j = 0;j<departments->getComponent(i)->numberOfLeaves();j++)
+         for(int j = 0;j<dynamic_cast<Departments*>(departments->getComponent(i))->numberOfLeaves();j++)
          {
              pugi::xml_node employmentNode = employmentsNode.append_child("employment");
              employmentNode.append_child("surname").text().set(dynamic_cast<Employee*>(departments->getComponent(i)->getComponent(j))->getSurname().c_str());

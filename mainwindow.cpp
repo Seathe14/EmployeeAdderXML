@@ -104,16 +104,16 @@ void MainWindow::on_addEmplBtn_clicked()
 
 void MainWindow::fillItems()
 {
-    for(int i =0;i<pb.departments->numberOfLeaves();i++)
+    for(int i =0;i<dynamic_cast<Departments*>(pb.departments)->numberOfLeaves();i++)
     {
         QTreeWidgetItem *itm = new QTreeWidgetItem(ui->treeWidget);
         itm->setText(0,QString::fromStdString(dynamic_cast<Departments*>(pb.departments->getComponent(i))->getName()));
         departmentItems.insert(itm,pb.departments->getComponent(i));
         ui->treeWidget->insertTopLevelItem(0,itm);
     }
-    for(int i =0;i<pb.departments->numberOfLeaves();i++)
+    for(int i =0;i<dynamic_cast<Departments*>(pb.departments)->numberOfLeaves();i++)
     {
-        for(int j =0;j<pb.departments->getComponent(i)->numberOfLeaves();j++)
+        for(int j =0;j<dynamic_cast<Departments*>(pb.departments->getComponent(i))->numberOfLeaves();j++)
         {
             std::string FIO = dynamic_cast<Employee*>(pb.departments->getComponent(i)->getComponent(j))->FIO();
             QTreeWidgetItem *child = new QTreeWidgetItem();
@@ -153,7 +153,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
     if(item->parent() == nullptr)
     {
-        ui->departmentAvgSalaryLE->setText(QString::number(departmentItems.value(item)->countAvgSalary()));
+        ui->departmentAvgSalaryLE->setText(QString::number(dynamic_cast<Departments*>(departmentItems.value(item))->countAvgSalary()));
         ui->departmentEmployeeNumLE ->setText(QString::number(dynamic_cast<Departments*>(departmentItems.value(item))->getNumOfEmployees()));
         return;
     }
@@ -165,6 +165,7 @@ void MainWindow::on_treeWidget_itemActivated(QTreeWidgetItem *item, int column)
         return;
     }
     Employee* employeeItm = dynamic_cast<Employee*>(employeeItems.value(item));
+    //employeeItm->add();
     ui->surnameLE->setText(QString::fromStdString(employeeItm->getSurname()));
     ui->nameLE->setText(QString::fromStdString(employeeItm->getName()));
     ui->middleNameLE->setText(QString::fromStdString(employeeItm->getMiddleName()));
